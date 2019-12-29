@@ -7,8 +7,8 @@ The SMS part is built on top of Twilio's [Programmable Chat API](https://www.twi
 This repository consists of two parts:
 
 ```
-/App.js              # the frontend React app
-/deploy/functions/*  # supporting backend scripts, to be deployed as Twilio Functions
+/src/               # the frontend React app
+/deploy/functions/  # supporting backend scripts, to be deployed as Twilio Functions
 ```
 
 The npm `deploy` command utilizes [Twilio CLI](https://www.twilio.com/docs/twilio-cli/quickstart) to deploy both the frontend and backend to Twilio Runtime.
