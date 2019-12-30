@@ -88,8 +88,10 @@ Assets:
 
 ## Screenshots
 
-![SMS1](./screenshots/sms1.png)
-![SMS2](./screenshots/sms2.png)
-![SMS3](./screenshots/sms3.png)
-![Call1](./screenshots/call1.png)
-![Call2](./screenshots/call2.png)
+### SMS
+
+![SMS](./screenshots/sms.jpg)
+
+### Call
+
+![Call](./screenshots/call.jpg)
