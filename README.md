@@ -23,16 +23,73 @@ The npm `deploy` command utilizes [Twilio CLI](https://www.twilio.com/docs/twili
 
 ## Installation
 
+Before you start, make sure you have [Twilio CLI](https://www.twilio.com/docs/twilio-cli/quickstart) and its [serverless plugin](https://www.twilio.com/docs/twilio-cli/plugins#available-plugins) installed and working.
+
+Then there are couple things that need to be prepared before the installation:
+
+1. Note down your [Account SID and Auth Token](https://www.twilio.com/console)
+2. Create and note down [API key & secret](https://www.twilio.com/console/project/api-keys)
+3. Create a [Programmable Chat Service](https://www.twilio.com/console/chat/services) and note down its SID
+
 ```
-npm install
-cd deploy; npm install; cd ..
-vim deploy/.env  # fill in all the variables
-npm run deploy
+$ npm install                    # install React dependencies
+$ cd deploy; npm install; cd ..  # install Twilio Runtime dependencies
+$ npm run deploy                 # test deploy your application to get its public URLs
+...
+Functions:
+   [protected] https://twilio-phone-client-XXXX-dev.twil.io/callOutbound <<< note down the /callOutbound URL
+   [protected] https://twilio-phone-client-XXXX-dev.twil.io/msgInbound   <<< note down the /msgInbound URL
+   https://twilio-phone-client-XXXX-dev.twil.io/getAccessToken
+   https://twilio-phone-client-XXXX-dev.twil.io/getCapToken
+   https://twilio-phone-client-XXXX-dev.twil.io/msgOutbound
+
 ```
 
+Your phone client will **not work** at this point.
+
+4. Purchase a [Twilio phone number](https://www.twilio.com/console/phone-numbers/incoming) and note it down (if you plan to use both SMS and calls, make sure your phone number has both capabilities). In the phone number's configuration, set the "A Message Comes In" Webhook to the `/msgInbound` URL you have collected above.
+
+![A Message Comes In](./screenshots/msg_webhook.png)
+
+5. Create a new [TwiML App](https://www.twilio.com/console/voice/twiml/apps) and set its Voice Request URL to the `/callOutbound` URL you have noted in the previous step. Save it and then go back to the TwiML App's configuration and note down its SID.
+
+![TwiML APP](./screenshots/twiml_app.png)
+
+6. Save the collected information and deploy
+
+```
+$ cp deploy/.env.sample deploy/.env
+$ vim deploy/.env   # fill in information collected in the previous steps
+ACCOUNT_SID=ACxxx
+AUTH_TOKEN=xxx
+SYNC_API_KEY=SKxxx
+SYNC_API_SECRET=xxx
+CHAT_SERVICE_SID=ISxxx
+TWILIO_NUMBER=+1xxx
+TWIML_APP_SID=APxxx
+
+$ npm run deploy    # deploy your application for the 2nd time
+...
+Assets:
+   https://twilio-phone-client-XXXX-dev.twil.io/asset-manifest.json
+   https://twilio-phone-client-XXXX-dev.twil.io/favicon.ico
+   https://twilio-phone-client-XXXX-dev.twil.io/index.html  <<< this is your client's URL
+   ...
+```
+
+7. Now you can open the deployed `index.html` URL in your web browser and start your phone client.
 
 ## ToDo
 
  * Add support for inbound calls (currently only outbound calls are supported)
  * Add support for Multimedia Messages (MMS) for both inbound and outbound
  * Add call history and allow quick redials
+ * Add ability to delete SMS threads from within the client
+
+## Screenshots
+
+![SMS1](./screenshots/sms1.png)
+![SMS2](./screenshots/sms2.png)
+![SMS3](./screenshots/sms3.png)
+![Call1](./screenshots/call1.png)
+![Call2](./screenshots/call2.png)

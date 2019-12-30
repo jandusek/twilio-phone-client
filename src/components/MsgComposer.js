@@ -64,7 +64,6 @@ export default class MsgComposer extends Component {
     }
     const body = formParams({
       To: toNumber,
-      From: this.props.clientNumber,
       Body: this.state.msgText
     });
 

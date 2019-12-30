@@ -7,7 +7,6 @@ exports.handler = (context, event, callback) => {
   const chatName = event.From;
 
   function postMessage(chatService) {
-    let response = new Twilio.Response();
     chatService.channels(chatName)
       .messages
       .create({
@@ -21,6 +20,7 @@ exports.handler = (context, event, callback) => {
         // ToDo: Add media handling for MMS
       }).then(message => {
         console.log(message);
+        response.setStatusCode(204);
         callback(null, response);
       }).catch(e => console.error("error posting message:", e));
   }
@@ -47,13 +47,21 @@ exports.handler = (context, event, callback) => {
               })
               .catch(e => {
                 console.error(`error joining member: ${e}`)
+                response.setBody(`error joining member: ${e}`);
+                response.setStatusCode(500);
+                callback(null, response);
               });
           })
           .catch(e => {
             console.error(`error creating channel: ${e}`)
+            response.setBody(`error creating channel: ${e}`);
+            response.setStatusCode(500);
+            callback(null, response);
           });
       } else {
-        console.error(e);
+        console.error(`unknown error: ${e}`);
+        response.setBody(`unknown error: ${e}`);
+        response.setStatusCode(500);
         callback(null, response);
       }
     });

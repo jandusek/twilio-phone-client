@@ -17,7 +17,6 @@ export default class Canvas extends Component {
     super(props);
     this.state = {
       selectedChannel: "sms",
-      clientNumber: "+15185351029",
       chatClient: null,
       chatChannelList: null,
       voiceClient: null
@@ -131,7 +130,6 @@ export default class Canvas extends Component {
       <ChannelContent
         selectedChannel={this.state.selectedChannel}
         client={this.state.selectedChannel === "sms" ? this.state.chatClient : this.state.voiceClient}
-        clientNumber={this.state.clientNumber}
         channelList={this.state.selectedChannel === "sms" ? this.state.chatChannelList : null}
       />
     </ViewPort>;

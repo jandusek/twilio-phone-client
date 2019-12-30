@@ -8,13 +8,11 @@ function ChannelContent(props) {
   if (props.selectedChannel === "sms") {
     return <MsgCanvas
       client={props.client}
-      clientNumber={props.clientNumber}
       channelList={props.channelList}
     />
   } else if (props.selectedChannel === "call") {
     return <CallCanvas
       client={props.client}
-      clientNumber={props.clientNumber}
     />;
   } else {
     return <AltCanvas>Channel not supported</AltCanvas>;
