@@ -91,6 +91,11 @@ Assets:
 
 7. Now you can open the deployed `index.html` URL in your web browser and start your phone client.
 
+**Pro tip:** To run the client in its own resizable window with minimal window chrome, you can use something like this:
+
+MacOS: `/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"`
+Windows: `chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"`
+
 ## ToDo
 
  * Add support for inbound calls (currently only outbound calls are supported)
