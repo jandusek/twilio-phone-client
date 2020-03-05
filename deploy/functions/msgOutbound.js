@@ -7,11 +7,13 @@ function testE164(number) {
 
 exports.handler = (context, event, callback) => {
   let response = new Twilio.Response();
+  const From_number = context.TWILIO_NUMBER;
+
   response.setHeaders({
     "Access-Control-Allow-Origin": "*"
   });
 
-  if (!testE164(event.From) || !testE164(event.To)) {
+  if (!testE164(From_number) || !testE164(event.To)) {
     response.setBody("Invalid phone number.");
     response.setStatusCode(500);
     callback(null, response);
@@ -30,7 +32,7 @@ exports.handler = (context, event, callback) => {
         from: "us",
         body: event.Body,
         attributes: JSON.stringify({
-          fromNumber: event.From,
+          fromNumber: From_number,
           toNumber: event.To,
           sid: message.sid,
           numSegments: message.numSegments,
@@ -48,7 +50,7 @@ exports.handler = (context, event, callback) => {
   }
 
   client.messages
-    .create({ body: event.Body, from: event.From, to: event.To })
+    .create({ body: event.Body, from: From_number, to: event.To })
     .then(message => {
       console.log("Message sent:", message)
       chatService.channels(chatName)
