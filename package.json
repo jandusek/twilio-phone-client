@@ -5,15 +5,16 @@
     "dependencies": {
         "axios": "^0.19.2",
         "chroma-js": "^2.1.0",
-        "immutability-helper": "^3.0.2",
-        "libphonenumber-js": "^1.7.51",
+        "immutability-helper": "^3.1.1",
+        "libphonenumber-js": "^1.7.52",
         "react": "^16.13.1",
         "react-dom": "^16.13.1",
         "react-scripts": "^3.4.1",
         "react-tooltip": "^3.11.6",
         "styled-components": "^4.4.1",
-        "twilio-chat": "^3.3.7",
-        "twilio-client": "^1.10.3"
+        "twilio-chat": "^3.4.0",
+        "twilio-client": "^1.11.0",
+        "websocket-extensions": "^0.1.4"
     },
     "scripts": {
         "start": "react-scripts start",
@@ -38,6 +39,6 @@
         ]
     },
     "devDependencies": {
-        "nodemon": "^2.0.3"
+        "nodemon": "^2.0.4"
     }
 }
