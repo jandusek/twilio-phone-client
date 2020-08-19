@@ -43,7 +43,7 @@ Then there are couple things that need to be prepared before the installation:
 2. Create and note down [API key & secret](https://www.twilio.com/console/project/api-keys)
 3. Create a [Programmable Chat Service](https://www.twilio.com/console/chat/services) and note down its SID
 
-Then clone this repository:
+Now clone this repository:
 
 ```
 $ git clone https://github.com/jandusek/twilio-phone-client.git
