@@ -20,8 +20,7 @@ exports.handler = function (context, event, callback) {
       context.ACCOUNT_SID,
       context.API_KEY || context.SYNC_API_KEY, // backwards compatibility (SYNC_ was removed from name for clarity)
       context.API_SECRET || context.SYNC_API_SECRET, // backwards compatibility (SYNC_ was removed from name for clarity)
-      // ToDo: change to 3600
-      { ttl: 300 } // tokenAboutToExpire event is triggered 3 minutes before expiration to this gives each token ~57m of effective lifetime
+      { ttl: 3600 } // tokenAboutToExpire event is triggered 3 minutes before expiration to this gives each token ~57m of effective lifetime
     );
     const chatGrant = new ChatGrant({
       serviceSid: context.CHAT_SERVICE_SID
