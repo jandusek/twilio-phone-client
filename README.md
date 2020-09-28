@@ -2,13 +2,13 @@
 
 ## Table of contents
 
-  * [Introduction](#introduction)
-    + [Notable features](#notable-features)
-  * [Installation](#installation)
-  * [ToDo](#todo)
-  * [Screenshots](#screenshots)
-    + [SMS](#sms)
-    + [Call](#call)
+- [Introduction](#introduction)
+  - [Notable features](#notable-features)
+- [Installation](#installation)
+- [ToDo](#todo)
+- [Screenshots](#screenshots)
+  - [SMS](#sms)
+  - [Call](#call)
 
 ## Introduction
 
@@ -25,13 +25,11 @@ This repository consists of two parts:
 
 The npm `deploy` command utilizes [Twilio CLI](https://www.twilio.com/docs/twilio-cli/quickstart) to deploy both the frontend and backend to [Twilio Runtime](https://www.twilio.com/docs/runtime/functions-assets-api).
 
-
 ### Notable features
 
- * SMS: Infitinty scolling (older messages get loaded automatically as one scrolls up in a thread)
- * SMS: Hovering over message timestamp displays tooltip with additional details of each message including its [SID](https://www.twilio.com/docs/glossary/what-is-a-sid)
- * Configurable accent color (see `REACT_APP_ACCENT_COLOR` in `/.env`)
-
+- SMS: Infitinty scolling (older messages get loaded automatically as one scrolls up in a thread)
+- SMS: Hovering over message timestamp displays tooltip with additional details of each message including its [SID](https://www.twilio.com/docs/glossary/what-is-a-sid)
+- Configurable accent color (see `REACT_APP_ACCENT_COLOR` in `/.env`)
 
 ## Installation
 
@@ -39,7 +37,7 @@ Before you start, make sure you have [Twilio CLI](https://www.twilio.com/docs/tw
 
 Then there are couple things that need to be prepared before the installation:
 
-1. Note down your [Account SID and Auth Token](https://www.twilio.com/console)
+1. Note down your [Account SID](https://www.twilio.com/console)
 2. Create and note down [API key & secret](https://www.twilio.com/console/project/api-keys)
 3. Create a [Programmable Chat Service](https://www.twilio.com/console/chat/services) and note down its SID
 
@@ -82,9 +80,8 @@ Your phone client will **not work** at this point.
 $ cp deploy/.env.sample deploy/.env
 $ vim deploy/.env   # fill in information collected in the previous steps
 ACCOUNT_SID=ACxxx
-AUTH_TOKEN=xxx
-SYNC_API_KEY=SKxxx
-SYNC_API_SECRET=xxx
+API_KEY=SKxxx
+API_SECRET=xxx
 CHAT_SERVICE_SID=ISxxx
 TWILIO_NUMBER=+1xxx
 TWIML_APP_SID=APxxx
@@ -102,16 +99,16 @@ Assets:
 
 **Pro tip:** To run the client in its own resizable window with minimal window chrome, you can use something like this:
 
-macOS: ```/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"```
+macOS: `/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"`
 
-Windows: ```chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"```
+Windows: `chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"`
 
 ## ToDo
 
- * Add support for inbound calls (currently only outbound calls are supported)
- * Add support for Multimedia Messages (MMS) for both inbound and outbound
- * Add call history and allow quick redials
- * Add ability to delete SMS threads from within the client
+- Add support for inbound calls (currently only outbound calls are supported)
+- Add support for Multimedia Messages (MMS) for both inbound and outbound
+- Add call history and allow quick redials
+- Add ability to delete SMS threads from within the client
 
 ## Screenshots
 
@@ -122,3 +119,12 @@ Windows: ```chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.htm
 ### Call
 
 ![Call](./screenshots/call.jpg)
+
+## Changelog
+
+### v1.0 - First stable version
+
+- Moved from Capability to Access tokens for Client.js
+- Auth Token no longer needed, authentication fully via API keys
+
+### v0.9 - Proof of concept

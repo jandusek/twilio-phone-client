@@ -3,8 +3,10 @@ import styled, { keyframes, css } from 'styled-components';
 import chroma from 'chroma-js';
 
 const textAreaMaxHeight = 82; // px
-//const msgOutboundUrl = 'https://build-client-backend-5498-dev.twil.io/msgOutbound';
-const msgOutboundUrl = '/msgOutbound';
+const msgOutboundUrl =
+  (process.env.REACT_APP_RUNTIME_DOMAIN
+    ? process.env.REACT_APP_RUNTIME_DOMAIN
+    : '') + '/msgOutbound';
 
 const hover_accent = chroma(process.env.REACT_APP_ACCENT_COLOR).darken().hex();
 
