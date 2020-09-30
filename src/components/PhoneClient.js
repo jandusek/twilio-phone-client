@@ -26,7 +26,7 @@ export default class Canvas extends Component {
       token: null,
       authorized: false,
       authCounter: 0,
-      secret: localStorage.getItem('secret') || null,
+      secret: localStorage.getItem('secret'),
       displayError: null,
       newMessages: null // ToDo: update this somewhere when a new message arrives
     };
@@ -62,7 +62,10 @@ export default class Canvas extends Component {
           if (response.status === 200) {
             return response.text();
           } else if (response.status === 401) {
-            this.setState({ authorized: false });
+            this.setState({
+              authorized: false,
+              authCounter: this.state.authCounter + 1
+            });
             const errText = await response.text();
             console.error(
               'Authorization failed - check if SECRET env variable is set correctly:',
@@ -72,8 +75,10 @@ export default class Canvas extends Component {
           }
         })
         .then((token) => {
-          this.setState({ authorized: true });
-          resolve(token);
+          if (token !== undefined) {
+            this.setState({ authorized: true, authCounter: 0 });
+            resolve(token);
+          }
         })
         .catch((err) => {
           console.error('Error fetching Access Token:', err);
@@ -269,7 +274,7 @@ export default class Canvas extends Component {
       return <ViewPort>Error occurred: {this.state.displayError}</ViewPort>;
     } else if (
       this.state.authorized === false &&
-      this.state.authCounter < maxAuthAttempts
+      this.state.authCounter <= maxAuthAttempts
     ) {
       return (
         <ViewPort>
@@ -278,7 +283,7 @@ export default class Canvas extends Component {
       );
     } else if (
       this.state.authorized === false &&
-      this.state.authCounter >= maxAuthAttempts
+      this.state.authCounter > maxAuthAttempts
     ) {
       return (
         <ViewPort>
