@@ -5,7 +5,7 @@
 - [Introduction](#introduction)
   - [Notable features](#notable-features)
 - [Installation](#installation)
-- [ToDo](#todo)
+- [Roadmap](#roadmap)
 - [Screenshots](#screenshots)
   - [SMS](#sms)
   - [Call](#call)
