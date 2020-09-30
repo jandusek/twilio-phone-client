@@ -105,10 +105,11 @@ Windows: `chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"
 
 ## ToDo
 
-- Add support for inbound calls (currently only outbound calls are supported)
+- Add support for inbound calls (work in progress)
+- Add unread badges to individual messaging threads and SMS channel overall
+- Add ability to delete SMS threads from within the client
 - Add support for Multimedia Messages (MMS) for both inbound and outbound
 - Add call history and allow quick redials
-- Add ability to delete SMS threads from within the client
 
 ## Screenshots
 
