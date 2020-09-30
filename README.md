@@ -105,6 +105,7 @@ Windows: `chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"
 
 ## ToDo
 
+- Add basic form of authentication
 - Add support for inbound calls (work in progress)
 - Add unread badges to individual messaging threads and SMS channel overall
 - Add ability to delete SMS threads from within the client
