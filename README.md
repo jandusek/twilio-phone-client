@@ -132,7 +132,7 @@ Windows: `chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"
 - Moved from Capability to Access tokens for Client.js
 - Auth Token no longer needed, authentication fully via API keys
 
-### Upgrade steps from v0.9
+#### Upgrade steps from v0.9
 
 - rename env variables in `deploy/.env` from `SYNC_API_KEY` and `SYNC_API_SECRET` to `API_KEY` and `API_SECRET`
 - create a new [Chat Service](https://www.twilio.com/console/chat/services) and update CHAT_SERVICE_SID with its SID in `deploy/.env`
