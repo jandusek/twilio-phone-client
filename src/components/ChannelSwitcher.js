@@ -1,29 +1,42 @@
 import React from 'react';
 import styled from 'styled-components';
+import { SvgPhone } from './CallDialpadComponents';
 
 function ChannelSwitcher(props) {
-  return <TabsContainer>
-    <Tabs>
-      <TabHeader>
-        <Tab
-          selected={props.selectedChannel === "sms" ? true : false}
-          onClick={props.setChannel.bind(null, "sms")}
-        >
-          <Channel>sms</Channel>
-        </Tab>
-        <StateIndicator selected={props.selectedChannel === "sms" ? true : false} />
-      </TabHeader>
-      <TabHeader>
-        <Tab
-          selected={props.selectedChannel === "call" ? true : false}
-          onClick={props.setChannel.bind(null, "call")}
-        >
-          <Channel>call</Channel>
-        </Tab>
-        <StateIndicator selected={props.selectedChannel === "call" ? true : false} />
-      </TabHeader>
-    </Tabs>
-  </TabsContainer>;
+  return (
+    <TabsContainer>
+      <Tabs>
+        <TabHeader>
+          <Tab
+            selected={props.selectedChannel === 'sms' ? true : false}
+            onClick={props.setChannel.bind(null, 'sms')}
+          >
+            {props.newMessages > 0 && <Badge>{props.newMessages}</Badge>}
+            <Channel>sms</Channel>
+          </Tab>
+          <StateIndicator
+            selected={props.selectedChannel === 'sms' ? true : false}
+          />
+        </TabHeader>
+        <TabHeader>
+          <Tab
+            selected={props.selectedChannel === 'call' ? true : false}
+            onClick={props.setChannel.bind(null, 'call')}
+          >
+            {props.incomingCall !== null && ( // ToDo: replace with proper indicator of any (not just incoming) call in progress
+              <Badge>
+                <SvgPhone style={{ height: '0.75em' }} />
+              </Badge>
+            )}
+            <Channel>call</Channel>
+          </Tab>
+          <StateIndicator
+            selected={props.selectedChannel === 'call' ? true : false}
+          />
+        </TabHeader>
+      </Tabs>
+    </TabsContainer>
+  );
 }
 
 const TabsContainer = styled.div`
@@ -66,7 +79,7 @@ const TabHeader = styled.div`
 `;
 
 const Tab = styled.button`
-  outline:none;
+  outline: none;
   -webkit-appearance: button;
   -webkit-writing-mode: horizontal-tb !important;
   text-rendering: auto;
@@ -83,7 +96,7 @@ const Tab = styled.button`
 
   color: rgb(34, 34, 34);
   text-transform: uppercase;
-  font-weight: ${props => props.selected === true ? "bold" : "normal"};
+  font-weight: ${(props) => (props.selected === true ? 'bold' : 'normal')};
   line-height: 1.1;
   letter-spacing: 2px;
   cursor: pointer;
@@ -105,9 +118,9 @@ const Channel = styled.span`
   margin: 0;
   padding: 0;
   border: 0;
-  font-size: 100 %;
+  font-size: 100%;
   font: inherit;
-  vertical - align: baseline;
+  vertical-align: baseline;
 `;
 
 const StateIndicator = styled.div`
@@ -117,7 +130,25 @@ const StateIndicator = styled.div`
   right: 0px;
   bottom: 0px;
   top: auto;
-  ${props => props.selected === true ? "background: " + process.env.REACT_APP_ACCENT_COLOR + ";" : ""}
+  ${(props) =>
+    props.selected === true
+      ? 'background: ' + process.env.REACT_APP_ACCENT_COLOR + ';'
+      : ''}
+`;
+
+const Badge = styled.div`
+  position: absolute;
+  right: -30%;
+  top: 10%;
+  font-size: 100%;
+  padding: 0.4em;
+  border-radius: 2em;
+  line-height: 0.75em;
+  color: white;
+  background: ${process.env.REACT_APP_ACCENT_COLOR};
+  text-align: center;
+  min-width: 1.5em;
+  font-weight: bold;
 `;
 
 export default ChannelSwitcher;

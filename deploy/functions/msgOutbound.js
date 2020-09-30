@@ -1,4 +1,3 @@
-const identity = 'build-client';
 const twilio = require('twilio');
 
 function testE164(number) {
@@ -7,6 +6,7 @@ function testE164(number) {
 }
 
 exports.handler = (context, event, callback) => {
+  const identity = 'client' + context.TWILIO_NUMBER;
   let response = new Twilio.Response();
   const fromNumber = context.TWILIO_NUMBER;
 

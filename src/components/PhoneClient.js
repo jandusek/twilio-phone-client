@@ -18,7 +18,9 @@ export default class Canvas extends Component {
       chatClient: null,
       chatChannelList: null,
       voiceClient: null,
-      token: null
+      incomingCall: null,
+      token: null,
+      newMessages: null // ToDo: update this somewhere when a new message arrives
     };
     this.setChannel = this.setChannel.bind(this);
     this.initClients = this.initClients.bind(this);
@@ -61,7 +63,6 @@ export default class Canvas extends Component {
         const s_now = Math.floor(Date.now() / 1000);
         const s_expire = decoded_token.exp;
         console.log(`Token is expiring in ${s_expire - s_now}s`);
-        // ToDo: check if token is expired
         if (s_expire - s_now < 300) {
           // token is about to expire, let's renew it
           this._fetchToken().then((token) => {
@@ -110,7 +111,9 @@ export default class Canvas extends Component {
           // recipient of the `Dial` verb answers.
           enableRingingState: true
         });
-        voiceClient.on('ready', (device) => {});
+        voiceClient.on('ready', (device) => {
+          console.log('voiceClient is ready');
+        });
         voiceClient.on('error', (error) => {
           console.log('Twilio.Device Error: ', error);
           // JWT Token Expired
@@ -122,8 +125,29 @@ export default class Canvas extends Component {
             });
           }
         });
+        voiceClient.on('incoming', (conn) => {
+          console.log('PC: INCOMING event fired from ' + conn.parameters.From);
+          this.setState({ incomingCall: conn });
+          conn.on('reject', (conn) => {
+            // when incoming call gets rejected from CallCanvas, update state
+            this.setState({
+              incomingCall: null
+            });
+          });
+        });
+        voiceClient.on('cancel', (conn) => {
+          console.log('PC: CANCEL event fired');
+          this.setState({
+            incomingCall: null
+          });
+        });
 
-        console.log('Voice init done');
+        voiceClient.on('connect', (connection) => {
+          console.log('PC: CONNECT event fired');
+          this.setState({ incomingCall: null }); // cleanup the incoming call state and let the component handle this natively
+        });
+
+        console.log('voiceClient is initialized');
         this.setState({ voiceClient });
 
         // initialize Chat client
@@ -135,7 +159,7 @@ export default class Canvas extends Component {
               const channel = paginator.items[i];
               chatChannelList[channel.uniqueName] = channel;
             }
-            console.log('Chat init done');
+            console.log('chatClient is initialized');
 
             this.setState({ chatChannelList });
           });
@@ -206,6 +230,8 @@ export default class Canvas extends Component {
         <ChannelSwitcher
           setChannel={this.setChannel}
           selectedChannel={this.state.selectedChannel}
+          incomingCall={this.state.incomingCall}
+          newMessages={this.state.newMessages}
         />
         <ChannelContent
           selectedChannel={this.state.selectedChannel}
@@ -219,6 +245,7 @@ export default class Canvas extends Component {
               ? this.state.chatChannelList
               : null
           }
+          incomingCall={this.state.incomingCall}
         />
       </ViewPort>
     );
