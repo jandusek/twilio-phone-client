@@ -85,6 +85,7 @@ API_SECRET=xxx
 CHAT_SERVICE_SID=ISxxx
 TWILIO_NUMBER=+1xxx
 TWIML_APP_SID=APxxx
+SECRET=some_password
 
 $ npm run deploy    # deploy your application for the 2nd time
 ...
@@ -127,7 +128,16 @@ Windows: `chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"
 
 ### v1.0 - First stable version
 
+- This is a breaking change version and reinstallation is recommended (identity used in SDKs and Chat channel member name is now tied to the phone number, API key env variables have been renamed)
 - Moved from Capability to Access tokens for Client.js
 - Auth Token no longer needed, authentication fully via API keys
 
+### Upgrade steps from v0.9
+
+- rename env variables in `deploy/.env` from `SYNC_API_KEY` and `SYNC_API_SECRET` to `API_KEY` and `API_SECRET`
+- create a new [Chat Service](https://www.twilio.com/console/chat/services) and update CHAT_SERVICE_SID with its SID in `deploy/.env`
+- add a SECRET env variable with some shared secret (effectively a password) to `deploy/.env`
+
 ### v0.9 - Proof of concept
+
+- Initial version

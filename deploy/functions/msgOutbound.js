@@ -1,3 +1,4 @@
+const isEnabled = true; // master switch for programmatic enabling/disabling of the client
 const twilio = require('twilio');
 
 function testE164(number) {
@@ -16,6 +17,21 @@ exports.handler = (context, event, callback) => {
       'Access-Control-Allow-Origin': '*'
     });
 
+  // check master switch
+  if (!isEnabled) {
+    response.setStatusCode(404);
+    response.setBody('This client is currently disabled');
+    return callback(null, response);
+  }
+
+  // check secret
+  if (event.secret !== context.SECRET) {
+    response.setStatusCode(401);
+    response.setBody('Invalid secret');
+    return callback(null, response);
+  }
+
+  // check format of the two phone numbers
   if (!testE164(fromNumber)) {
     response.setBody(`Invalid originator phone number: '${fromNumber}'`);
     response.setStatusCode(500);

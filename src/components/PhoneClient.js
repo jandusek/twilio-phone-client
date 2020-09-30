@@ -5,6 +5,7 @@ import jwt_decode from 'jwt-decode';
 
 import ChannelSwitcher from './ChannelSwitcher';
 import ChannelContent from './ChannelContent';
+import { ModalMessage } from './CommonComponents';
 
 import axios from 'axios';
 const TwilioChat = require('twilio-chat');
@@ -20,11 +21,15 @@ export default class Canvas extends Component {
       voiceClient: null,
       incomingCall: null,
       token: null,
+      authorized: null,
+      secret: 'mySecret',
+      displayError: null,
       newMessages: null // ToDo: update this somewhere when a new message arrives
     };
     this.setChannel = this.setChannel.bind(this);
     this.initClients = this.initClients.bind(this);
     this.getToken = this.getToken.bind(this);
+    this._fetchToken = this._fetchToken.bind(this);
   }
 
   /**
@@ -38,16 +43,31 @@ export default class Canvas extends Component {
           ? process.env.REACT_APP_RUNTIME_DOMAIN
           : '') + '/getAccessToken';
       axios
-        .get(accessTokenGenerator, {})
+        // ToDo: move to POST, however need to figure out how to handle OPTIONS in a Function first
+        .get(accessTokenGenerator, { params: { secret: this.state.secret } })
         .then((result) => {
           if (result.status === 200) {
             const token = result.data.toString();
+            this.setState({ authorized: true });
             resolve(token);
           }
         })
         .catch((err) => {
-          console.error('Error fetching Access Token:', err);
-          reject(err);
+          if (err.response && err.response.status === 401) {
+            this.setState({ authorized: false });
+            console.error(
+              'Authorization failed - check if SECRET env variable is set correctly:',
+              err.response
+            );
+            reject(err);
+          } else {
+            console.error('Error fetching Access Token:', err);
+            this.setState({
+              displayError:
+                'Error fetching Access Token: ' + JSON.stringify(err)
+            });
+            reject(err);
+          }
         });
     });
   }
@@ -225,30 +245,42 @@ export default class Canvas extends Component {
   }
 
   render() {
-    return (
-      <ViewPort>
-        <ChannelSwitcher
-          setChannel={this.setChannel}
-          selectedChannel={this.state.selectedChannel}
-          incomingCall={this.state.incomingCall}
-          newMessages={this.state.newMessages}
-        />
-        <ChannelContent
-          selectedChannel={this.state.selectedChannel}
-          client={
-            this.state.selectedChannel === 'sms'
-              ? this.state.chatClient
-              : this.state.voiceClient
-          }
-          channelList={
-            this.state.selectedChannel === 'sms'
-              ? this.state.chatChannelList
-              : null
-          }
-          incomingCall={this.state.incomingCall}
-        />
-      </ViewPort>
-    );
+    if (this.state.displayError) {
+      return <ViewPort>Error occurred: {this.state.displayError}</ViewPort>;
+    } else if (this.state.authorized === null) {
+      return <ViewPort>Authorizing...</ViewPort>;
+    } else if (this.state.authorized === false) {
+      return (
+        <ViewPort>
+          <ModalMessage msg="Authorization failed" img="auth_fail" />
+        </ViewPort>
+      );
+    } else {
+      return (
+        <ViewPort>
+          <ChannelSwitcher
+            setChannel={this.setChannel}
+            selectedChannel={this.state.selectedChannel}
+            incomingCall={this.state.incomingCall}
+            newMessages={this.state.newMessages}
+          />
+          <ChannelContent
+            selectedChannel={this.state.selectedChannel}
+            client={
+              this.state.selectedChannel === 'sms'
+                ? this.state.chatClient
+                : this.state.voiceClient
+            }
+            channelList={
+              this.state.selectedChannel === 'sms'
+                ? this.state.chatChannelList
+                : null
+            }
+            incomingCall={this.state.incomingCall}
+          />
+        </ViewPort>
+      );
+    }
   }
 }
 

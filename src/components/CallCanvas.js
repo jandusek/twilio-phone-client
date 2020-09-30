@@ -7,6 +7,7 @@ import {
   DialRed,
   DialGreen
 } from './CallDialpadComponents';
+import { ModalMessage, SvgOffline } from './CommonComponents';
 
 import { AsYouType } from 'libphonenumber-js';
 
@@ -335,19 +336,10 @@ export default class CanvasMsg extends Component {
     if (!this.props.client || this.props.client.status() === 'offline') {
       return (
         <Canvas>
-          <Centerer>
-            <div
-              style={{
-                width: '50vw',
-                maxWidth: '100px'
-              }}
-            >
-              <SvgOffline />
-            </div>
-            <span style={{ color: '#565B73', padding: '2vh' }}>
-              Voice client is offline
-            </span>
-          </Centerer>
+          <ModalMessage
+            msg="Voice client is offline"
+            img="offline"
+          ></ModalMessage>
         </Canvas>
       );
     } else if (this.props.incomingCall !== null) {
@@ -519,38 +511,3 @@ const IncomingDials = styled.div`
     margin-top: 332px;
   }
 `;
-
-const Centerer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-`;
-
-const SvgOffline = (props) => (
-  <svg
-    viewBox="0 0 200 147"
-    fillRule="evenodd"
-    clipRule="evenodd"
-    strokeLinejoin="round"
-    margin="20px"
-    strokeMiterlimit={2}
-    {...props}
-  >
-    <path
-      d="M200 106.833c0 22.087-17.92 40-40 40H46.667C20.94 146.833 0 125.893 0 100.167 0 81.52 11.04 65.373 26.873 57.98c-.106-1.46-.206-3.02-.206-4.48C26.667 24.02 50.52.167 80 .167c22.293 0 41.353 13.646 49.373 33.126 4.587-4.06 10.627-6.46 17.294-6.46 14.686 0 26.666 11.98 26.666 26.667 0 5.313-1.56 10.207-4.273 14.373 17.707 4.167 30.94 20 30.94 38.96z"
-      fill="#bebebe"
-    />
-    <path
-      d="M140.788 113.306a6.97 6.97 0 01-2.022 4.902l-9.807 9.807a6.999 6.999 0 01-4.902 2.021c-1.8 0-3.604-.719-4.901-2.021l-21.202-21.202-21.203 21.202a6.996 6.996 0 01-4.901 2.021c-1.8 0-3.605-.719-4.902-2.021l-9.807-9.807a7 7 0 01-2.022-4.902c0-1.8.72-3.604 2.022-4.901l21.202-21.203L57.141 66a7 7 0 01-2.022-4.902c0-1.799.72-3.604 2.022-4.901l9.807-9.807a7 7 0 014.902-2.022c1.8 0 3.604.72 4.901 2.022l21.203 21.202 21.202-21.202a6.997 6.997 0 014.901-2.022c1.8 0 3.605.72 4.902 2.022l9.807 9.807a7 7 0 012.022 4.901c0 1.8-.72 3.605-2.022 4.902l-21.202 21.202 21.202 21.203a6.997 6.997 0 012.022 4.901z"
-      fill="#bebebe"
-    />
-    <path
-      d="M140.788 113.306a6.97 6.97 0 01-2.022 4.902l-9.807 9.807a6.999 6.999 0 01-4.902 2.021c-1.8 0-3.604-.719-4.901-2.021l-21.202-21.202-21.203 21.202a6.996 6.996 0 01-4.901 2.021c-1.8 0-3.605-.719-4.902-2.021l-9.807-9.807a7 7 0 01-2.022-4.902c0-1.8.72-3.604 2.022-4.901l21.202-21.203L57.141 66a7 7 0 01-2.022-4.902c0-1.799.72-3.604 2.022-4.901l9.807-9.807a7 7 0 014.902-2.022c1.8 0 3.604.72 4.901 2.022l21.203 21.202 21.202-21.202a6.997 6.997 0 014.901-2.022c1.8 0 3.605.72 4.902 2.022l9.807 9.807a7 7 0 012.022 4.901c0 1.8-.72 3.605-2.022 4.902l-21.202 21.202 21.202 21.203a6.997 6.997 0 012.022 4.901z"
-      fill="#fff"
-    />
-  </svg>
-);
