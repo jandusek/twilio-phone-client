@@ -103,7 +103,7 @@ macOS: `/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app="ht
 
 Windows: `chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"`
 
-## ToDo
+## Roadmap
 
 - Add basic form of authentication
 - Add one-click installation option (using Heroku) to eliminate the need for local env and numerous manual installation steps
