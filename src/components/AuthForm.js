@@ -30,12 +30,6 @@ export default class AuthForm extends Component {
     if (this.state.remember) {
       localStorage.setItem('secret', secret);
     }
-    console.log(
-      'Secret is being set to:',
-      this.state.secret,
-      'remember:',
-      this.state.remember
-    );
   }
 
   handleKeypress(event) {}
