@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import update from 'immutability-helper';
 import jwt_decode from 'jwt-decode';
-import { formParams } from '../lib/common';
+import { formParams, stringify } from '../lib/common';
 
 import ChannelSwitcher from './ChannelSwitcher';
 import ChannelContent from './ChannelContent';
@@ -89,7 +89,7 @@ export default class Canvas extends Component {
         .catch((err) => {
           console.error('Error fetching Access Token:', err);
           this.setState({
-            displayError: 'Error fetching Access Token: ' + JSON.stringify(err)
+            displayError: `Error fetching Access Token (${stringify(err)})`
           });
           reject(err);
         });
@@ -277,7 +277,14 @@ export default class Canvas extends Component {
 
   render() {
     if (this.state.displayError) {
-      return <ViewPort>Error occurred: {this.state.displayError}</ViewPort>;
+      return (
+        <ViewPort>
+          <ModalMessage
+            msg={'Error occurred: ' + this.state.displayError}
+            img="alert"
+          />
+        </ViewPort>
+      );
     } else if (
       this.state.authorized === false &&
       this.state.authCounter <= maxAuthAttempts

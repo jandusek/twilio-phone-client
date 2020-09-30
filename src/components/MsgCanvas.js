@@ -90,9 +90,16 @@ export default class CanvasMsg extends Component {
   }
 
   msgAddedHandler = (contact, msg) => {
+    console.log(contact, msg, this.state.msgCache);
+    if (this.state.msgCache[contact] === undefined) {
+      this.setState({
+        msgCache: update(this.state.msgCache, { $add: [contact, []] })
+      });
+    }
     this.setState({
       msgCache: update(this.state.msgCache, { [contact]: { $push: [msg] } })
     });
+    console.log(contact, msg, this.state.msgCache);
   };
 
   fetchMsgsForContact(contact) {
