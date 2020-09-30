@@ -26,6 +26,7 @@ export default class Canvas extends Component {
       token: null,
       authorized: false,
       authCounter: 0,
+      authError: '',
       secret: localStorage.getItem('secret'),
       displayError: null,
       newMessages: null // ToDo: update this somewhere when a new message arrives
@@ -62,11 +63,12 @@ export default class Canvas extends Component {
           if (response.status === 200) {
             return response.text();
           } else if (response.status === 401) {
+            const errText = await response.text();
             this.setState({
               authorized: false,
+              authError: this.state.authCounter === 0 ? '' : errText,
               authCounter: this.state.authCounter + 1
             });
-            const errText = await response.text();
             console.error(
               'Authorization failed - check if SECRET env variable is set correctly:',
               errText
@@ -76,7 +78,11 @@ export default class Canvas extends Component {
         })
         .then((token) => {
           if (token !== undefined) {
-            this.setState({ authorized: true, authCounter: 0 });
+            this.setState({
+              authorized: true,
+              authError: '',
+              authCounter: 0
+            });
             resolve(token);
           }
         })
@@ -278,7 +284,7 @@ export default class Canvas extends Component {
     ) {
       return (
         <ViewPort>
-          <AuthForm setSecret={this.setSecret} />
+          <AuthForm setSecret={this.setSecret} errMsg={this.state.authError} />
         </ViewPort>
       );
     } else if (

@@ -67,6 +67,9 @@ export default class AuthForm extends Component {
                 value={this.state.secret}
                 onChange={this.updateSecret}
               />
+              {this.props.errMsg && (
+                <LabelError>({this.props.errMsg})</LabelError>
+              )}
             </p>
             <p>
               <BtnSubmit onClick={this.handleSubmit}>
@@ -169,6 +172,10 @@ const LabelSmall = styled(Label)`
   @media (min-width: 400px) {
     font-size: 16px;
   }
+`;
+
+const LabelError = styled(LabelSmall)`
+  color: ${process.env.REACT_APP_ACCENT_COLOR};
 `;
 
 const HiddenCheckbox = styled.input.attrs({ type: 'checkbox' })`
