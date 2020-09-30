@@ -7,7 +7,7 @@ import {
   DialRed,
   DialGreen
 } from './CallDialpadComponents';
-import { ModalMessage, SvgOffline } from './CommonComponents';
+import { ModalMessage } from './CommonComponents';
 
 import { AsYouType } from 'libphonenumber-js';
 

@@ -6,7 +6,13 @@ import CallCanvas from './CallCanvas';
 
 function ChannelContent(props) {
   if (props.selectedChannel === 'sms') {
-    return <MsgCanvas client={props.client} channelList={props.channelList} />;
+    return (
+      <MsgCanvas
+        client={props.client}
+        channelList={props.channelList}
+        secret={props.secret}
+      />
+    );
   } else if (props.selectedChannel === 'call') {
     return (
       <CallCanvas client={props.client} incomingCall={props.incomingCall} />

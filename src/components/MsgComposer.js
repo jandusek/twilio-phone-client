@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import chroma from 'chroma-js';
+import { formParams } from '../lib/common';
 
 const textAreaMaxHeight = 82; // px
 const msgOutboundUrl =
@@ -57,15 +58,6 @@ export default class MsgComposer extends Component {
 
   handleSend() {
     this.setState({ sending: true });
-    function formParams(params) {
-      return Object.keys(params)
-        .map((key) => {
-          return (
-            encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
-          );
-        })
-        .join('&');
-    }
 
     const contact = this.props.selectedContact;
     let toNumber = contact;
@@ -73,8 +65,9 @@ export default class MsgComposer extends Component {
       toNumber = this.normalizePhoneNumber(this.props.newPhoneNumber);
     }
     const body = formParams({
-      To: toNumber,
-      Body: this.state.msgText
+      to: toNumber,
+      body: this.state.msgText,
+      secret: this.props.secret
     });
 
     fetch(msgOutboundUrl, {

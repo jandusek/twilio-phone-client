@@ -37,8 +37,8 @@ exports.handler = (context, event, callback) => {
     response.setStatusCode(500);
     return callback(null, response);
   }
-  if (!testE164(event.To)) {
-    response.setBody(`Invalid recipient phone number: '${event.To}'`);
+  if (!testE164(event.to)) {
+    response.setBody(`Invalid recipient phone number: '${event.to}'`);
     response.setStatusCode(500);
     return callback(null, response);
   }
@@ -46,7 +46,7 @@ exports.handler = (context, event, callback) => {
   const client = new twilio(context.API_KEY, context.API_SECRET, {
     accountSid: context.ACCOUNT_SID
   });
-  const chatName = event.To;
+  const chatName = event.to;
   const chatService = client.chat.services(context.CHAT_SERVICE_SID);
 
   function postMessageToChat(chatService, chatName, message) {
@@ -54,10 +54,10 @@ exports.handler = (context, event, callback) => {
       .channels(chatName)
       .messages.create({
         from: 'us',
-        body: event.Body,
+        body: event.body,
         attributes: JSON.stringify({
           fromNumber,
-          toNumber: event.To,
+          toNumber: event.to,
           sid: message.sid,
           numSegments: message.numSegments,
           dateCreated: message.dateCreated
@@ -76,7 +76,7 @@ exports.handler = (context, event, callback) => {
   }
 
   client.messages
-    .create({ body: event.Body, from: fromNumber, to: event.To })
+    .create({ body: event.body, from: fromNumber, to: event.to })
     .then((message) => {
       if (context.DEBUG > 0) console.log('Message sent:', message);
       chatService

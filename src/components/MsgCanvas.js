@@ -160,6 +160,7 @@ export default class CanvasMsg extends Component {
           />
           <MsgComposer
             key="msgComposer"
+            secret={this.props.secret}
             selectedContact={this.state.selectedContact}
             selectContact={this.selectContact}
             newPhoneNumber={this.state.newPhoneNumber}

@@ -2,14 +2,17 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import update from 'immutability-helper';
 import jwt_decode from 'jwt-decode';
+import { formParams } from '../lib/common';
 
 import ChannelSwitcher from './ChannelSwitcher';
 import ChannelContent from './ChannelContent';
+import AuthForm from './AuthForm';
 import { ModalMessage } from './CommonComponents';
 
-import axios from 'axios';
 const TwilioChat = require('twilio-chat');
 const TwilioVoice = require('twilio-client');
+
+const maxAuthAttempts = 3;
 
 export default class Canvas extends Component {
   constructor(props) {
@@ -21,8 +24,9 @@ export default class Canvas extends Component {
       voiceClient: null,
       incomingCall: null,
       token: null,
-      authorized: null,
-      secret: 'mySecret',
+      authorized: false,
+      authCounter: 0,
+      secret: localStorage.getItem('secret') || null,
       displayError: null,
       newMessages: null // ToDo: update this somewhere when a new message arrives
     };
@@ -30,6 +34,7 @@ export default class Canvas extends Component {
     this.initClients = this.initClients.bind(this);
     this.getToken = this.getToken.bind(this);
     this._fetchToken = this._fetchToken.bind(this);
+    this.setSecret = this.setSecret.bind(this);
   }
 
   /**
@@ -42,34 +47,49 @@ export default class Canvas extends Component {
         (process.env.REACT_APP_RUNTIME_DOMAIN
           ? process.env.REACT_APP_RUNTIME_DOMAIN
           : '') + '/getAccessToken';
-      axios
-        // ToDo: move to POST, however need to figure out how to handle OPTIONS in a Function first
-        .get(accessTokenGenerator, { params: { secret: this.state.secret } })
-        .then((result) => {
-          if (result.status === 200) {
-            const token = result.data.toString();
-            this.setState({ authorized: true });
-            resolve(token);
-          }
-        })
-        .catch((err) => {
-          if (err.response && err.response.status === 401) {
+
+      const body = formParams({
+        secret: this.state.secret // handle escaping
+      });
+      fetch(accessTokenGenerator, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body
+      })
+        .then(async (response) => {
+          if (response.status === 200) {
+            return response.text();
+          } else if (response.status === 401) {
             this.setState({ authorized: false });
+            const errText = await response.text();
             console.error(
               'Authorization failed - check if SECRET env variable is set correctly:',
-              err.response
+              errText
             );
-            reject(err);
-          } else {
-            console.error('Error fetching Access Token:', err);
-            this.setState({
-              displayError:
-                'Error fetching Access Token: ' + JSON.stringify(err)
-            });
-            reject(err);
+            reject(errText);
           }
+        })
+        .then((token) => {
+          this.setState({ authorized: true });
+          resolve(token);
+        })
+        .catch((err) => {
+          console.error('Error fetching Access Token:', err);
+          this.setState({
+            displayError: 'Error fetching Access Token: ' + JSON.stringify(err)
+          });
+          reject(err);
         });
     });
+  }
+
+  /**
+   * Secret setter
+   */
+  setSecret(secret) {
+    this.setState({ secret }, () => this.initClients());
   }
 
   /**
@@ -247,9 +267,19 @@ export default class Canvas extends Component {
   render() {
     if (this.state.displayError) {
       return <ViewPort>Error occurred: {this.state.displayError}</ViewPort>;
-    } else if (this.state.authorized === null) {
-      return <ViewPort>Authorizing...</ViewPort>;
-    } else if (this.state.authorized === false) {
+    } else if (
+      this.state.authorized === false &&
+      this.state.authCounter < maxAuthAttempts
+    ) {
+      return (
+        <ViewPort>
+          <AuthForm setSecret={this.setSecret} />
+        </ViewPort>
+      );
+    } else if (
+      this.state.authorized === false &&
+      this.state.authCounter >= maxAuthAttempts
+    ) {
       return (
         <ViewPort>
           <ModalMessage msg="Authorization failed" img="auth_fail" />
@@ -257,28 +287,31 @@ export default class Canvas extends Component {
       );
     } else {
       return (
-        <ViewPort>
-          <ChannelSwitcher
-            setChannel={this.setChannel}
-            selectedChannel={this.state.selectedChannel}
-            incomingCall={this.state.incomingCall}
-            newMessages={this.state.newMessages}
-          />
-          <ChannelContent
-            selectedChannel={this.state.selectedChannel}
-            client={
-              this.state.selectedChannel === 'sms'
-                ? this.state.chatClient
-                : this.state.voiceClient
-            }
-            channelList={
-              this.state.selectedChannel === 'sms'
-                ? this.state.chatChannelList
-                : null
-            }
-            incomingCall={this.state.incomingCall}
-          />
-        </ViewPort>
+        <React.StrictMode>
+          <ViewPort>
+            <ChannelSwitcher
+              setChannel={this.setChannel}
+              selectedChannel={this.state.selectedChannel}
+              incomingCall={this.state.incomingCall}
+              newMessages={this.state.newMessages}
+            />
+            <ChannelContent
+              selectedChannel={this.state.selectedChannel}
+              secret={this.state.secret}
+              client={
+                this.state.selectedChannel === 'sms'
+                  ? this.state.chatClient
+                  : this.state.voiceClient
+              }
+              channelList={
+                this.state.selectedChannel === 'sms'
+                  ? this.state.chatChannelList
+                  : null
+              }
+              incomingCall={this.state.incomingCall}
+            />
+          </ViewPort>
+        </React.StrictMode>
       );
     }
   }
@@ -291,5 +324,5 @@ const ViewPort = styled.div`
   flex-direction: column;
   flex-wrap: nowrap;
   align-items: stretch;
-  max-width: 440px;
+  max-width: 400px;
 `;
