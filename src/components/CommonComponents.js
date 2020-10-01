@@ -96,4 +96,34 @@ const SvgAlert = (props) => (
   </svg>
 );
 
-export { ModalMessage, FullScreen };
+const BadgeTemplate = styled.div`
+  border-radius: 2em;
+  color: white;
+  min-width: 1.5em;
+  font-weight: bold;
+  line-height: 0.75em;
+`;
+
+const Badge = styled(BadgeTemplate)`
+  position: absolute;
+  right: -30%;
+  top: 10%;
+  font-size: 100%;
+  padding: 0.4em;
+  background: ${process.env.REACT_APP_ACCENT_COLOR};
+  text-align: center;
+  min-width: 1.5em;
+  font-weight: bold;
+`;
+
+const BadgeAfter = styled(BadgeTemplate)`
+  position: relative;
+  font-size: 75%;
+  width: 10px;
+  padding: 0.4em 0.3em;
+  border-radius: 2em;
+  background: ${process.env.REACT_APP_ACCENT_COLOR};
+  text-align: center;
+`;
+
+export { ModalMessage, FullScreen, Badge, BadgeAfter };

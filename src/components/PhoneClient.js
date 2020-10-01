@@ -286,6 +286,14 @@ export default class Canvas extends Component {
         </ViewPort>
       );
     } else if (
+      // if the initial login attempt hasn't bee made yet, don't show anything
+      // (to avoid UI redraws with login form flashing brieafly before client load)
+      this.state.authorized === false &&
+      this.state.authCounter === 0
+    ) {
+      return <ViewPort></ViewPort>;
+    } else if (
+      // if the initial login attempt failed, show a login form
       this.state.authorized === false &&
       this.state.authCounter <= maxAuthAttempts
     ) {
@@ -295,6 +303,8 @@ export default class Canvas extends Component {
         </ViewPort>
       );
     } else if (
+      // if the max number of attempts was exceeded, show error to discourage
+      // repeated logins
       this.state.authorized === false &&
       this.state.authCounter > maxAuthAttempts
     ) {

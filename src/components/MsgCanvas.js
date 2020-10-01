@@ -20,6 +20,7 @@ export default class CanvasMsg extends Component {
       selectedContact: null,
       pgtrCache: {},
       msgCache: {},
+      unreadsCache: {},
       newPhoneNumber: ''
     };
     this.selectContact = this.selectContact.bind(this);
@@ -32,6 +33,42 @@ export default class CanvasMsg extends Component {
     this.setState({ selectedContact });
     if (selectedContact !== null) {
       this.fetchMsgsForContact(selectedContact); // async fetch data for selected contact
+      this.props.client
+        .getChannelByUniqueName(selectedContact)
+        .then((channel) => {
+          // mark all messages as read
+          channel.setAllMessagesConsumed().then(() => {
+            // when done, update cache as well
+            this.setState({
+              unreadsCache: update(this.state.unreadsCache, {
+                [selectedContact]: { $set: 0 }
+              })
+            });
+          });
+        });
+    }
+  }
+
+  getUnreadMsgs(channel, contact) {
+    // if there's no consumed messages, all messages are unread
+    // (getUnconsumedMessagesCount doesn't really work in this case
+    // so we need to handle this edge case manually)
+    if (channel.lastConsumedMessageIndex === null) {
+      channel.getMessagesCount().then((cnt) => {
+        this.setState({
+          unreadsCache: update(this.state.unreadsCache, {
+            [contact]: { $set: cnt }
+          })
+        });
+      });
+    } else {
+      channel.getUnconsumedMessagesCount().then((cnt) => {
+        this.setState({
+          unreadsCache: update(this.state.unreadsCache, {
+            [contact]: { $set: cnt }
+          })
+        });
+      });
     }
   }
 
@@ -90,16 +127,31 @@ export default class CanvasMsg extends Component {
   }
 
   msgAddedHandler = (contact, msg) => {
-    console.log(contact, msg, this.state.msgCache);
     if (this.state.msgCache[contact] === undefined) {
       this.setState({
-        msgCache: update(this.state.msgCache, { $add: [contact, []] })
+        msgCache: update(this.state.msgCache, {
+          $merge: { [contact]: [] }
+        })
       });
     }
     this.setState({
       msgCache: update(this.state.msgCache, { [contact]: { $push: [msg] } })
     });
-    console.log(contact, msg, this.state.msgCache);
+    if (
+      // if we're the originator of the message, it means we've read it
+      // (this ensures messages originating from this client don't count as unread)
+      msg.state.author === 'us' ||
+      // or same thing if user has the thread the message belongs to currently opened
+      contact === this.state.selectedContact
+    ) {
+      this.props.channelList[contact]
+        .updateLastConsumedMessageIndex(msg.state.index)
+        .then(() => {
+          this.getUnreadMsgs(this.props.channelList[contact], contact);
+        });
+    } else {
+      this.getUnreadMsgs(this.props.channelList[contact], contact);
+    }
   };
 
   fetchMsgsForContact(contact) {
@@ -126,6 +178,7 @@ export default class CanvasMsg extends Component {
               [contact]: { $set: paginator }
             })
           });
+          this.getUnreadMsgs(channel, contact);
         });
         // then subscribe for receiving new messages
         if (!this.msgAddedHandlerTracker[contact]) {
@@ -195,6 +248,7 @@ export default class CanvasMsg extends Component {
               channelList={this.props.channelList}
               selectContact={this.selectContact}
               msgCache={this.state.msgCache}
+              unreadsCache={this.state.unreadsCache}
             />
           </Canvas>
         );

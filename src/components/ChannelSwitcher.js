@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { SvgPhone } from './CallDialpadComponents';
+import { Badge } from './CommonComponents';
 
 function ChannelSwitcher(props) {
   return (
@@ -134,21 +135,6 @@ const StateIndicator = styled.div`
     props.selected === true
       ? 'background: ' + process.env.REACT_APP_ACCENT_COLOR + ';'
       : ''}
-`;
-
-const Badge = styled.div`
-  position: absolute;
-  right: -30%;
-  top: 10%;
-  font-size: 100%;
-  padding: 0.4em;
-  border-radius: 2em;
-  line-height: 0.75em;
-  color: white;
-  background: ${process.env.REACT_APP_ACCENT_COLOR};
-  text-align: center;
-  min-width: 1.5em;
-  font-weight: bold;
 `;
 
 export default ChannelSwitcher;
