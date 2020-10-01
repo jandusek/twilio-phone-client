@@ -1,7 +1,11 @@
+const twilio = require('twilio');
+
 exports.handler = (context, event, callback) => {
   const identity = 'client' + context.TWILIO_NUMBER;
   let response = new Twilio.Response();
-  client = context.getTwilioClient();
+  const client = new twilio(context.API_KEY, context.API_SECRET, {
+    accountSid: context.ACCOUNT_SID
+  });
   const chatName = event.From;
 
   function postMessage(chatService) {
@@ -38,12 +42,16 @@ exports.handler = (context, event, callback) => {
       // if channel doesn't exist, create one
       if (e.code === 20404) {
         chatService.channels
-          .create({ uniqueName: chatName })
+          .create({
+            uniqueName: chatName
+          })
           .then((channel) => {
             // add our generic identity as a member of that channel
             chatService
               .channels(chatName)
-              .members.create({ identity })
+              .members.create({
+                identity
+              })
               .then((member) => {
                 console.log(`created channel: ${channel.uniqueName}`);
                 postMessage(chatService);
