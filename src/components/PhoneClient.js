@@ -29,13 +29,15 @@ export default class Canvas extends Component {
       authError: '',
       secret: localStorage.getItem('secret'),
       displayError: null,
-      newMessages: null // ToDo: update this somewhere when a new message arrives
+      newMessages: null, // ToDo: update this somewhere when a new message arrives
+      msgUnreadsCache: {}
     };
     this.setChannel = this.setChannel.bind(this);
     this.initClients = this.initClients.bind(this);
     this.getToken = this.getToken.bind(this);
     this._fetchToken = this._fetchToken.bind(this);
     this.setSecret = this.setSecret.bind(this);
+    this.updateUnreadMsgs = this.updateUnreadMsgs.bind(this);
   }
 
   /**
@@ -101,6 +103,30 @@ export default class Canvas extends Component {
    */
   setSecret(secret) {
     this.setState({ secret }, () => this.initClients());
+  }
+
+  updateUnreadMsgs(channel, contact) {
+    console.log(this.state, contact);
+    // if there's no consumed messages, all messages are unread
+    // (getUnconsumedMessagesCount doesn't really work in this case
+    // so we need to handle this edge case manually)
+    if (channel.lastConsumedMessageIndex === null) {
+      channel.getMessagesCount().then((cnt) => {
+        this.setState({
+          msgUnreadsCache: update(this.state.msgUnreadsCache, {
+            [contact]: { $set: cnt }
+          })
+        });
+      });
+    } else {
+      channel.getUnconsumedMessagesCount().then((cnt) => {
+        this.setState({
+          msgUnreadsCache: update(this.state.msgUnreadsCache, {
+            [contact]: { $set: cnt }
+          })
+        });
+      });
+    }
   }
 
   /**
@@ -324,6 +350,8 @@ export default class Canvas extends Component {
               newMessages={this.state.newMessages}
             />
             <ChannelContent
+              msgUnreadsCache={this.state.msgUnreadsCache}
+              updateUnreadMsgs={this.updateUnreadMsgs}
               selectedChannel={this.state.selectedChannel}
               secret={this.state.secret}
               client={

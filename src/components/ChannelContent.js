@@ -11,6 +11,8 @@ function ChannelContent(props) {
         client={props.client}
         channelList={props.channelList}
         secret={props.secret}
+        msgUnreadsCache={props.msgUnreadsCache}
+        updateUnreadMsgs={props.updateUnreadMsgs}
       />
     );
   } else if (props.selectedChannel === 'call') {

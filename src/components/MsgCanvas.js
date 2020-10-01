@@ -20,7 +20,6 @@ export default class CanvasMsg extends Component {
       selectedContact: null,
       pgtrCache: {},
       msgCache: {},
-      unreadsCache: {},
       newPhoneNumber: ''
     };
     this.selectContact = this.selectContact.bind(this);
@@ -40,35 +39,13 @@ export default class CanvasMsg extends Component {
           channel.setAllMessagesConsumed().then(() => {
             // when done, update cache as well
             this.setState({
-              unreadsCache: update(this.state.unreadsCache, {
+              // ToDo!!!!
+              /*unreadsCache: update(this.props.unreadsCache, {
                 [selectedContact]: { $set: 0 }
-              })
+              })*/
             });
           });
         });
-    }
-  }
-
-  getUnreadMsgs(channel, contact) {
-    // if there's no consumed messages, all messages are unread
-    // (getUnconsumedMessagesCount doesn't really work in this case
-    // so we need to handle this edge case manually)
-    if (channel.lastConsumedMessageIndex === null) {
-      channel.getMessagesCount().then((cnt) => {
-        this.setState({
-          unreadsCache: update(this.state.unreadsCache, {
-            [contact]: { $set: cnt }
-          })
-        });
-      });
-    } else {
-      channel.getUnconsumedMessagesCount().then((cnt) => {
-        this.setState({
-          unreadsCache: update(this.state.unreadsCache, {
-            [contact]: { $set: cnt }
-          })
-        });
-      });
     }
   }
 
@@ -147,10 +124,10 @@ export default class CanvasMsg extends Component {
       this.props.channelList[contact]
         .updateLastConsumedMessageIndex(msg.state.index)
         .then(() => {
-          this.getUnreadMsgs(this.props.channelList[contact], contact);
+          this.props.updateUnreadMsgs(this.props.channelList[contact], contact);
         });
     } else {
-      this.getUnreadMsgs(this.props.channelList[contact], contact);
+      this.props.updateUnreadMsgs(this.props.channelList[contact], contact);
     }
   };
 
@@ -178,7 +155,7 @@ export default class CanvasMsg extends Component {
               [contact]: { $set: paginator }
             })
           });
-          this.getUnreadMsgs(channel, contact);
+          this.props.updateUnreadMsgs(channel, contact);
         });
         // then subscribe for receiving new messages
         if (!this.msgAddedHandlerTracker[contact]) {
@@ -244,11 +221,13 @@ export default class CanvasMsg extends Component {
             />
             <MsgContactList
               key="msgContactList"
+              msgUnreadsCache={this.props.msgUnreadsCache}
+              updateUnreadMsgs={this.props.updateUnreadMsgs}
               client={this.props.client}
               channelList={this.props.channelList}
               selectContact={this.selectContact}
               msgCache={this.state.msgCache}
-              unreadsCache={this.state.unreadsCache}
+              unreadsCache={this.props.unreadsCache}
             />
           </Canvas>
         );

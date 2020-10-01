@@ -7,9 +7,7 @@ import { BadgeAfter } from './CommonComponents';
 export default class MsgContactList extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      unreadCounts: []
-    };
+    this.state = {};
   }
 
   /*  componentDidUpdate(prevProps) {
@@ -18,6 +16,7 @@ export default class MsgContactList extends Component {
   }*/
 
   render() {
+    console.log(this.props.msgUnreadsCache);
     return (
       <div>
         {Object.keys(this.props.channelList)
@@ -46,9 +45,9 @@ export default class MsgContactList extends Component {
                 <Header>
                   <Author>{phoneNumberParsed}</Author>
                   <BadgeContainer>
-                    {this.props.unreadsCache[phoneNumber] > 0 && (
+                    {this.props.msgUnreadsCache[phoneNumber] > 0 && (
                       <BadgeAfter>
-                        {this.props.unreadsCache[phoneNumber]}
+                        {this.props.msgUnreadsCache[phoneNumber]}
                       </BadgeAfter>
                     )}
                   </BadgeContainer>
