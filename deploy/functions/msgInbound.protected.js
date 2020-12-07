@@ -1,6 +1,6 @@
 const twilio = require('twilio');
 
-exports.handler = (context, event, callback) => {
+exports.handler = async (context, event, callback) => {
   const identity = 'client' + context.TWILIO_NUMBER;
   let response = new Twilio.Response();
   const client = new twilio(context.API_KEY, context.API_SECRET, {
@@ -29,6 +29,11 @@ exports.handler = (context, event, callback) => {
       .catch((e) => console.error('error posting message:', e));
   }
 
+  const roles = await client.chat
+    .services(context.CHAT_SERVICE_SID)
+    .roles.list();
+  const adminRole = roles.find((role) => role.friendlyName === 'channel admin');
+
   const chatService = client.chat.services(context.CHAT_SERVICE_SID);
   console.log(`channel: ${chatName}`);
   chatService
@@ -50,7 +55,8 @@ exports.handler = (context, event, callback) => {
             chatService
               .channels(chatName)
               .members.create({
-                identity
+                identity,
+                roleSid: adminRole.sid
               })
               .then((member) => {
                 console.log(`created channel: ${channel.uniqueName}`);

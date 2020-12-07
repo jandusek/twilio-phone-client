@@ -4,6 +4,10 @@ import { SvgPhone } from './CallDialpadComponents';
 import { Badge } from './CommonComponents';
 
 function ChannelSwitcher(props) {
+  let msgUnreadsTotal = 0;
+  for (const contact in props.msgUnreadsCache) {
+    msgUnreadsTotal += props.msgUnreadsCache[contact];
+  }
   return (
     <TabsContainer>
       <Tabs>
@@ -12,7 +16,7 @@ function ChannelSwitcher(props) {
             selected={props.selectedChannel === 'sms' ? true : false}
             onClick={props.setChannel.bind(null, 'sms')}
           >
-            {props.newMessages > 0 && <Badge>{props.newMessages}</Badge>}
+            {msgUnreadsTotal > 0 && <Badge>{msgUnreadsTotal}</Badge>}
             <Channel>sms</Channel>
           </Tab>
           <StateIndicator

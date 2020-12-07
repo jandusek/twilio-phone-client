@@ -22,13 +22,9 @@ export default class CanvasMsg extends Component {
       msgCache: {},
       newPhoneNumber: ''
     };
-    this.selectContact = this.selectContact.bind(this);
-    this.fetchMsgsForContact = this.fetchMsgsForContact.bind(this);
-    this.fetchAnotherPage = this.fetchAnotherPage.bind(this);
-    this.updateNewPhoneNumber = this.updateNewPhoneNumber.bind(this);
   }
 
-  selectContact(selectedContact) {
+  selectContact = (selectedContact) => {
     this.setState({ selectedContact });
     if (selectedContact !== null) {
       this.fetchMsgsForContact(selectedContact); // async fetch data for selected contact
@@ -38,18 +34,20 @@ export default class CanvasMsg extends Component {
           // mark all messages as read
           channel.setAllMessagesConsumed().then(() => {
             // when done, update cache as well
-            this.setState({
-              // ToDo!!!!
-              /*unreadsCache: update(this.props.unreadsCache, {
-                [selectedContact]: { $set: 0 }
-              })*/
-            });
+            this.props.setUnreadsCache(selectedContact, 0);
           });
         });
     }
-  }
+  };
 
-  fetchAnotherPage() {
+  deleteThread = (contact) => {
+    this.props.client.getChannelByUniqueName(contact).then((channel) => {
+      // mark all messages as read
+      channel.delete();
+    });
+  };
+
+  fetchAnotherPage = () => {
     return new Promise((resolve, reject) => {
       const contact = this.state.selectedContact;
       if (contact === 'new') {
@@ -76,7 +74,7 @@ export default class CanvasMsg extends Component {
         });
       }
     });
-  }
+  };
 
   componentDidMount() {
     if (this.props.channelList) {
@@ -131,7 +129,7 @@ export default class CanvasMsg extends Component {
     }
   };
 
-  fetchMsgsForContact(contact) {
+  fetchMsgsForContact = (contact) => {
     if (contact === 'new') {
       return;
     }
@@ -167,16 +165,16 @@ export default class CanvasMsg extends Component {
           } else {
             return this.state.msgCache[contact];*/
     }
-  }
+  };
 
-  updateNewPhoneNumber(e) {
+  updateNewPhoneNumber = (e) => {
     if (e && e.target) {
       this.setState({ newPhoneNumber: e.target.value });
     } else if (e === '') {
       // for resets after sending message in MsgComposer
       this.setState({ newPhoneNumber: '' });
     }
-  }
+  };
 
   render() {
     if (this.state.selectedContact) {
@@ -226,6 +224,7 @@ export default class CanvasMsg extends Component {
               client={this.props.client}
               channelList={this.props.channelList}
               selectContact={this.selectContact}
+              deleteThread={this.deleteThread}
               msgCache={this.state.msgCache}
               unreadsCache={this.props.unreadsCache}
             />

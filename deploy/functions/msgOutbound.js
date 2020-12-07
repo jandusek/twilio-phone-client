@@ -6,7 +6,7 @@ function testE164(number) {
   return e164.test(number);
 }
 
-exports.handler = (context, event, callback) => {
+exports.handler = async (context, event, callback) => {
   const identity = 'client' + context.TWILIO_NUMBER;
   let response = new Twilio.Response();
   const fromNumber = context.TWILIO_NUMBER;
@@ -75,6 +75,11 @@ exports.handler = (context, event, callback) => {
       });
   }
 
+  const roles = await client.chat
+    .services(context.CHAT_SERVICE_SID)
+    .roles.list();
+  const adminRole = roles.find((role) => role.friendlyName === 'channel admin');
+
   client.messages
     .create({ body: event.body, from: fromNumber, to: event.to })
     .then((message) => {
@@ -96,7 +101,7 @@ exports.handler = (context, event, callback) => {
                 // add our generic identity as a member of that channel
                 chatService
                   .channels(chatName)
-                  .members.create({ identity })
+                  .members.create({ identity, roleSid: adminRole.sid })
                   .then((member) => {
                     if (context.DEBUG > 0)
                       console.log(`Created channel: ${channel.uniqueName}`);

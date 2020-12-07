@@ -29,7 +29,6 @@ export default class Canvas extends Component {
       authError: '',
       secret: localStorage.getItem('secret'),
       displayError: null,
-      newMessages: null, // ToDo: update this somewhere when a new message arrives
       msgUnreadsCache: {}
     };
     this.setChannel = this.setChannel.bind(this);
@@ -38,6 +37,7 @@ export default class Canvas extends Component {
     this._fetchToken = this._fetchToken.bind(this);
     this.setSecret = this.setSecret.bind(this);
     this.updateUnreadMsgs = this.updateUnreadMsgs.bind(this);
+    this.setUnreadsCache = this.setUnreadsCache.bind(this);
   }
 
   /**
@@ -103,6 +103,19 @@ export default class Canvas extends Component {
    */
   setSecret(secret) {
     this.setState({ secret }, () => this.initClients());
+  }
+
+  /**
+   * msgUnreadsCache setter
+   * @param {*} contact - the contact for which the cache should be updated
+   * @param {*} unread - new value
+   */
+  setUnreadsCache(contact, unread) {
+    this.setState({
+      msgUnreadsCache: update(this.state.msgUnreadsCache, {
+        [contact]: { $set: unread }
+      })
+    });
   }
 
   updateUnreadMsgs(channel, contact) {
@@ -240,6 +253,16 @@ export default class Canvas extends Component {
 
             this.setState({ chatChannelList });
           });
+          chatClient.on('channelRemoved', (channel) => {
+            console.log(channel);
+            if (this.state.chatChannelList !== null) {
+              this.setState({
+                chatChannelList: update(this.state.chatChannelList, {
+                  $unset: [channel.uniqueName]
+                })
+              });
+            }
+          });
           chatClient.on('channelAdded', (channel) => {
             if (this.state.chatChannelList !== null) {
               this.setState({
@@ -347,10 +370,11 @@ export default class Canvas extends Component {
               setChannel={this.setChannel}
               selectedChannel={this.state.selectedChannel}
               incomingCall={this.state.incomingCall}
-              newMessages={this.state.newMessages}
+              msgUnreadsCache={this.state.msgUnreadsCache}
             />
             <ChannelContent
               msgUnreadsCache={this.state.msgUnreadsCache}
+              setUnreadsCache={this.setUnreadsCache}
               updateUnreadMsgs={this.updateUnreadMsgs}
               selectedChannel={this.state.selectedChannel}
               secret={this.state.secret}
