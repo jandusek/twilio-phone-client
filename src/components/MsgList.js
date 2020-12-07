@@ -10,12 +10,9 @@ export default class MsgList extends Component {
     this.canScroll = true;
     this.state = {
       scrollListenerAttached: false
-    }
+    };
     this.messagesEndRef = React.createRef();
     this.scrollAreaRef = React.createRef();
-
-    this.onScroll = this.onScroll.bind(this);
-    this.attachScrollListener = this.attachScrollListener.bind(this);
   }
 
   componentWillUnmount() {
@@ -32,14 +29,14 @@ export default class MsgList extends Component {
     }
   }
 
-  attachScrollListener() {
+  attachScrollListener = () => {
     if (this.scrollAreaRef.current && !this.state.scrollListenerAttached) {
       this.scrollAreaRef.current.addEventListener('scroll', this.onScroll);
       this.setState({ scrollListenerAttached: true });
     }
-  }
+  };
 
-  onScroll() {
+  onScroll = () => {
     /*
      * this.scrollAreaRef.current.scrollTop - current position
      * this.scrollAreaRef.current.scrollHeight - height of element's content (including overflows)
@@ -47,13 +44,14 @@ export default class MsgList extends Component {
      */
     if (this.scrollAreaRef.current.scrollTop < 250 && this.canScroll) {
       this.canScroll = false;
-      this.props.fetchAnotherPage()
+      this.props
+        .fetchAnotherPage()
         .then(() => {
           this.canScroll = true;
         })
-        .catch(() => { });
+        .catch(() => {});
     }
-  }
+  };
 
   componentDidMount() {
     this.attachScrollListener();
@@ -67,7 +65,10 @@ export default class MsgList extends Component {
       // the 1st load
       (prevProps.messages === undefined && this.props.messages !== undefined) ||
       // or when new message was added (last messages are not the same)
-      (prevProps.messages && this.props.messages && prevProps.messages[prevProps.messages.length - 1] !== this.props.messages[this.props.messages.length - 1])
+      (prevProps.messages &&
+        this.props.messages &&
+        prevProps.messages[prevProps.messages.length - 1] !==
+          this.props.messages[this.props.messages.length - 1])
     ) {
       this.scrollToBottom();
     }
@@ -75,32 +76,60 @@ export default class MsgList extends Component {
 
   render() {
     let lastDate = null;
-    if (this.props.selectedContact === "new") {
-      return <Container>
-      </Container>;
+    if (this.props.selectedContact === 'new') {
+      return <Container></Container>;
     } else if (this.props.messages === undefined) {
-      return <Container>
-        <Spinner text="Loading messages..." />
-      </Container>;
+      return (
+        <Container>
+          <Spinner text="Loading messages..." />
+        </Container>
+      );
     } else {
       return (
         <Container key="msgListCont" ref={this.scrollAreaRef}>
-          <StyledReactTooltip key="tooltip" effect="solid" multiline={true} delayHide={500} delayShow={500} clickable={true} />
+          <StyledReactTooltip
+            key="tooltip"
+            effect="solid"
+            multiline={true}
+            delayHide={500}
+            delayShow={500}
+            clickable={true}
+          />
           <MsgCanvas key="msgCanvas">
-            {
-              this.props.messages.map(msg => {
-                return [(lastDate === prettyDate(msg.timestamp) ? null : <Date key={msg.timestamp}>{lastDate = prettyDate(msg.timestamp)}</Date>),
+            {this.props.messages.map((msg) => {
+              return [
+                lastDate === prettyDate(msg.timestamp) ? null : (
+                  <Date key={msg.timestamp}>
+                    {(lastDate = prettyDate(msg.timestamp))}
+                  </Date>
+                ),
                 <MsgListItem key={msg.sid} author={msg.author}>
                   <Bubble author={msg.author}>
                     <Header key="header">
                       <Author key="author">{msg.attributes.fromNumber}</Author>
-                      <TimeStamp key="timestamp"
+                      <TimeStamp
+                        key="timestamp"
                         data-tip={
-                          (msg.attributes.sid ? msg.attributes.sid + "<br />" : "") +
-                          (msg.attributes.fromNumber ? "From: " + msg.attributes.fromNumber + "<br />" : "") +
-                          (msg.attributes.toNumber ? "To: " + msg.attributes.toNumber + "<br />" : "") +
-                          (msg.attributes.dateCreated ? "Date created: " + msg.attributes.dateCreated + "<br />" : "") +
-                          (msg.attributes.numSegments ? "Sent as " + msg.attributes.numSegments + " segment" + (msg.attributes.numSegments > 1 ? "s" : "") : "")
+                          (msg.attributes.sid
+                            ? msg.attributes.sid + '<br />'
+                            : '') +
+                          (msg.attributes.fromNumber
+                            ? 'From: ' + msg.attributes.fromNumber + '<br />'
+                            : '') +
+                          (msg.attributes.toNumber
+                            ? 'To: ' + msg.attributes.toNumber + '<br />'
+                            : '') +
+                          (msg.attributes.dateCreated
+                            ? 'Date created: ' +
+                              msg.attributes.dateCreated +
+                              '<br />'
+                            : '') +
+                          (msg.attributes.numSegments
+                            ? 'Sent as ' +
+                              msg.attributes.numSegments +
+                              ' segment' +
+                              (msg.attributes.numSegments > 1 ? 's' : '')
+                            : '')
                         }
                       >
                         {printTimestamp(msg.timestamp)}
@@ -108,12 +137,12 @@ export default class MsgList extends Component {
                     </Header>
                     <Body key="body">{formatBodyText(msg.body)}</Body>
                   </Bubble>
-                </MsgListItem>];
-              })
-            }
+                </MsgListItem>
+              ];
+            })}
             <div ref={this.messagesEndRef} />
           </MsgCanvas>
-        </Container >
+        </Container>
       );
     }
   }
@@ -123,23 +152,23 @@ const StyledReactTooltip = styled(ReactTooltip)`
   &.type-dark {
     font-size: 12px;
     padding: 0.5rem 0.75rem;
-    background-color: #565B73;
-    color: #FFFFFF;
+    background-color: #565b73;
+    color: #ffffff;
     > * {
-      text-align: left;      
+      text-align: left;
     }
   }
   &.__react_component_tooltip.place-left::after {
-    border-left: 6px solid #565B73 !important;
+    border-left: 6px solid #565b73 !important;
   }
   &.__react_component_tooltip.place-right::after {
-    border-right: 6px solid #565B73 !important;
+    border-right: 6px solid #565b73 !important;
   }
   &.__react_component_tooltip.place-top::after {
-    border-top: 6px solid #565B73 !important;
+    border-top: 6px solid #565b73 !important;
   }
   &.__react_component_tooltip.place-bottom::after {
-    border-bottom: 6px solid #565B73 !important;
+    border-bottom: 6px solid #565b73 !important;
   }
 `;
 
@@ -177,21 +206,20 @@ const MsgListItem = styled.div`
   max-width: 440px;
   min-width: 100px;
   overflow-x: hidden;
-  ${(props) => props.author === "them" ?
-    // them - grey
-    `
+  ${(props) =>
+    props.author === 'them'
+      ? // them - grey
+        `
     align-self: left;
     margin-left: 0px;
     margin-right: 44px;
     `
-    :
-    // us - accent color
-    `
+      : // us - accent color
+        `
     align-self: right;
     margin-left: 44px;
     margin-right: 0px;
-    `
-  }
+    `}
 `;
 
 const Bubble = styled.div`
@@ -205,21 +233,20 @@ const Bubble = styled.div`
   flex-grow: 1;
   flex-shrink: 1;
   flex-direction: column;
-  ${(props) => props.author === "them" ?
-    // them - grey
-    `
+  ${(props) =>
+    props.author === 'them'
+      ? // them - grey
+        `
     background: #ECEDF1;
     color: rgb(34, 34, 34);
     margin-right: auto;
     `
-    :
-    // us - blue
-    `
+      : // us - blue
+        `
     background: ${process.env.REACT_APP_ACCENT_COLOR};
     color: #FFFFFF;
     margin-left: auto;
-    `
-  }
+    `}
   border-radius: 4px;
 `;
 
@@ -267,6 +294,6 @@ const Body = styled.div`
 const Date = styled.div`
   text-align: center;
   font-size: 12px;
-  color: #565B73;
+  color: #565b73;
   padding-top: 8px;
 `;

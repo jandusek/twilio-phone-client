@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import update from 'immutability-helper';
 import styled from 'styled-components';
 
 import MsgContactList from './MsgContactList';
@@ -18,8 +17,6 @@ export default class CanvasMsg extends Component {
     this.fetchTracker = {};
     this.state = {
       selectedContact: null,
-      pgtrCache: {},
-      msgCache: {},
       newPhoneNumber: ''
     };
   }
@@ -44,6 +41,8 @@ export default class CanvasMsg extends Component {
     this.props.client.getChannelByUniqueName(contact).then((channel) => {
       // mark all messages as read
       channel.delete();
+      this.fetchTracker[contact] = false;
+      delete this.msgAddedHandlerTracker[contact];
     });
   };
 
@@ -53,7 +52,7 @@ export default class CanvasMsg extends Component {
       if (contact === 'new') {
         return;
       }
-      const paginator = this.state.pgtrCache[contact];
+      const paginator = this.props.msgPgtrCache[contact];
       if (!paginator.hasPrevPage) {
         reject('No more messages.');
       } else {
@@ -62,14 +61,7 @@ export default class CanvasMsg extends Component {
           paginator.items.forEach((msg) => {
             messages.push(msg);
           });
-          this.setState({
-            msgCache: update(this.state.msgCache, {
-              [contact]: { $unshift: messages }
-            }),
-            pgtrCache: update(this.state.pgtrCache, {
-              [contact]: { $set: paginator }
-            })
-          });
+          this.props.addMsgCachePage(contact, messages, paginator);
           resolve();
         });
       }
@@ -102,16 +94,7 @@ export default class CanvasMsg extends Component {
   }
 
   msgAddedHandler = (contact, msg) => {
-    if (this.state.msgCache[contact] === undefined) {
-      this.setState({
-        msgCache: update(this.state.msgCache, {
-          $merge: { [contact]: [] }
-        })
-      });
-    }
-    this.setState({
-      msgCache: update(this.state.msgCache, { [contact]: { $push: [msg] } })
-    });
+    this.props.addMsgCacheMsg(contact, msg);
     if (
       // if we're the originator of the message, it means we've read it
       // (this ensures messages originating from this client don't count as unread)
@@ -122,10 +105,10 @@ export default class CanvasMsg extends Component {
       this.props.channelList[contact]
         .updateLastConsumedMessageIndex(msg.state.index)
         .then(() => {
-          this.props.updateUnreadMsgs(this.props.channelList[contact], contact);
+          this.props.setUnreadMsgs(this.props.channelList[contact], contact);
         });
     } else {
-      this.props.updateUnreadMsgs(this.props.channelList[contact], contact);
+      this.props.setUnreadMsgs(this.props.channelList[contact], contact);
     }
   };
 
@@ -134,7 +117,7 @@ export default class CanvasMsg extends Component {
       return;
     }
     if (
-      this.state.msgCache[contact] === undefined &&
+      this.props.msgCache[contact] === undefined &&
       !this.fetchTracker[contact]
     ) {
       this.fetchTracker[contact] = true; // prevent double-fetching
@@ -145,15 +128,8 @@ export default class CanvasMsg extends Component {
           paginator.items.forEach((msg) => {
             messages.push(msg);
           });
-          this.setState({
-            msgCache: update(this.state.msgCache, {
-              [contact]: { $set: messages }
-            }),
-            pgtrCache: update(this.state.pgtrCache, {
-              [contact]: { $set: paginator }
-            })
-          });
-          this.props.updateUnreadMsgs(channel, contact);
+          this.props.setMsgCachePage(contact, messages, paginator);
+          this.props.setUnreadMsgs(channel, contact);
         });
         // then subscribe for receiving new messages
         if (!this.msgAddedHandlerTracker[contact]) {
@@ -161,9 +137,6 @@ export default class CanvasMsg extends Component {
           channel.on('messageAdded', this.msgAddedHandler.bind(null, contact));
         }
       });
-      /*      return null;
-          } else {
-            return this.state.msgCache[contact];*/
     }
   };
 
@@ -189,7 +162,7 @@ export default class CanvasMsg extends Component {
           />
           <MsgList
             key="msgList"
-            messages={this.state.msgCache[this.state.selectedContact]}
+            messages={this.props.msgCache[this.state.selectedContact]}
             fetchAnotherPage={this.fetchAnotherPage}
             selectedContact={this.state.selectedContact}
           />
@@ -220,12 +193,11 @@ export default class CanvasMsg extends Component {
             <MsgContactList
               key="msgContactList"
               msgUnreadsCache={this.props.msgUnreadsCache}
-              updateUnreadMsgs={this.props.updateUnreadMsgs}
               client={this.props.client}
               channelList={this.props.channelList}
               selectContact={this.selectContact}
               deleteThread={this.deleteThread}
-              msgCache={this.state.msgCache}
+              msgCache={this.props.msgCache}
               unreadsCache={this.props.unreadsCache}
             />
           </Canvas>

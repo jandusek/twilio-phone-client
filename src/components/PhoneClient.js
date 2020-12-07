@@ -29,22 +29,17 @@ export default class Canvas extends Component {
       authError: '',
       secret: localStorage.getItem('secret'),
       displayError: null,
-      msgUnreadsCache: {}
+      msgUnreadsCache: {},
+      msgCache: {},
+      msgPgtrCache: {}
     };
-    this.setChannel = this.setChannel.bind(this);
-    this.initClients = this.initClients.bind(this);
-    this.getToken = this.getToken.bind(this);
-    this._fetchToken = this._fetchToken.bind(this);
-    this.setSecret = this.setSecret.bind(this);
-    this.updateUnreadMsgs = this.updateUnreadMsgs.bind(this);
-    this.setUnreadsCache = this.setUnreadsCache.bind(this);
   }
 
   /**
    * Fetch token from the <tt>getAccessToken</tt> function.
    * @returns {string}
    */
-  _fetchToken() {
+  _fetchToken = () => {
     return new Promise((resolve, reject) => {
       const accessTokenGenerator =
         (process.env.REACT_APP_RUNTIME_DOMAIN
@@ -96,30 +91,29 @@ export default class Canvas extends Component {
           reject(err);
         });
     });
-  }
+  };
 
   /**
    * Secret setter
    */
-  setSecret(secret) {
+  setSecret = (secret) => {
     this.setState({ secret }, () => this.initClients());
-  }
+  };
 
   /**
    * msgUnreadsCache setter
    * @param {*} contact - the contact for which the cache should be updated
    * @param {*} unread - new value
    */
-  setUnreadsCache(contact, unread) {
+  setUnreadsCache = (contact, unread) => {
     this.setState({
       msgUnreadsCache: update(this.state.msgUnreadsCache, {
         [contact]: { $set: unread }
       })
     });
-  }
+  };
 
-  updateUnreadMsgs(channel, contact) {
-    console.log(this.state, contact);
+  setUnreadMsgs = (channel, contact) => {
     // if there's no consumed messages, all messages are unread
     // (getUnconsumedMessagesCount doesn't really work in this case
     // so we need to handle this edge case manually)
@@ -140,13 +134,65 @@ export default class Canvas extends Component {
         });
       });
     }
-  }
+  };
+
+  /**
+   * Initialize message cache for given contact
+   * @param {*} contact
+   * @param {*} messages
+   * @param {*} paginator
+   */
+  setMsgCachePage = (contact, messages, paginator) => {
+    this.setState({
+      msgCache: update(this.state.msgCache, {
+        [contact]: { $set: messages }
+      }),
+      pgtrCache: update(this.state.msgPgtrCache, {
+        [contact]: { $set: paginator }
+      })
+    });
+  };
+
+  /**
+   * Add new page worth of messages using paginator
+   * @param {*} contact
+   * @param {*} messages
+   * @param {*} paginator
+   */
+  addMsgCachePage = (contact, messages, paginator) => {
+    this.setState({
+      msgCache: update(this.state.msgCache, {
+        [contact]: { $unshift: messages }
+      }),
+      pgtrCache: update(this.state.msgPgtrCache, {
+        [contact]: { $set: paginator }
+      })
+    });
+  };
+
+  /**
+   * Add one new message to the cache
+   * @param {*} contact
+   * @param {*} msg
+   */
+  addMsgCacheMsg = (contact, msg) => {
+    if (this.state.msgCache[contact] === undefined) {
+      this.setState({
+        msgCache: update(this.state.msgCache, {
+          $merge: { [contact]: [] }
+        })
+      });
+    }
+    this.setState({
+      msgCache: update(this.state.msgCache, { [contact]: { $push: [msg] } })
+    });
+  };
 
   /**
    * Wrapper around _fetchToken that stores the token in component's state
    * @returns {string}
    */
-  getToken() {
+  getToken = () => {
     return new Promise((resolve, reject) => {
       if (this.state.token) {
         const decoded_token = jwt_decode(this.state.token);
@@ -172,13 +218,13 @@ export default class Canvas extends Component {
         });
       }
     });
-  }
+  };
 
   /**
    * Initialize the Voice and Chat clients
    * @returns {string}
    */
-  initClients() {
+  initClients = () => {
     if (this.state.chatClient === null && this.state.voiceClient === null) {
       this.getToken().then((token) => {
         // initialize Voice client
@@ -254,10 +300,18 @@ export default class Canvas extends Component {
             this.setState({ chatChannelList });
           });
           chatClient.on('channelRemoved', (channel) => {
-            console.log(channel);
             if (this.state.chatChannelList !== null) {
               this.setState({
                 chatChannelList: update(this.state.chatChannelList, {
+                  $unset: [channel.uniqueName]
+                }),
+                msgUnreadsCache: update(this.state.msgUnreadsCache, {
+                  $unset: [channel.uniqueName]
+                }),
+                msgCache: update(this.state.msgCache, {
+                  $unset: [channel.uniqueName]
+                }),
+                msgPgtrCache: update(this.state.msgPgtrCache, {
                   $unset: [channel.uniqueName]
                 })
               });
@@ -268,6 +322,9 @@ export default class Canvas extends Component {
               this.setState({
                 chatChannelList: update(this.state.chatChannelList, {
                   $merge: { [channel.uniqueName]: channel }
+                }),
+                msgCache: update(this.state.msgCache, {
+                  [channel.uniqueName]: { $set: undefined }
                 })
               });
             }
@@ -301,11 +358,11 @@ export default class Canvas extends Component {
         });
       });
     }
-  }
+  };
 
-  setChannel(selectedChannel) {
+  setChannel = (selectedChannel) => {
     this.setState({ selectedChannel });
-  }
+  };
 
   componentDidMount() {
     this.initClients();
@@ -375,7 +432,12 @@ export default class Canvas extends Component {
             <ChannelContent
               msgUnreadsCache={this.state.msgUnreadsCache}
               setUnreadsCache={this.setUnreadsCache}
-              updateUnreadMsgs={this.updateUnreadMsgs}
+              setUnreadMsgs={this.setUnreadMsgs}
+              msgCache={this.state.msgCache}
+              msgPgtrCache={this.state.msgPgtrCache}
+              addMsgCachePage={this.addMsgCachePage}
+              setMsgCachePage={this.setMsgCachePage}
+              addMsgCacheMsg={this.addMsgCacheMsg}
               selectedChannel={this.state.selectedChannel}
               secret={this.state.secret}
               client={
