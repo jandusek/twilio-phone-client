@@ -5,92 +5,80 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { BadgeAfter } from './CommonComponents';
 const accent = process.env.REACT_APP_ACCENT_COLOR;
 
-export default class MsgContactList extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
-  /*  componentDidUpdate(prevProps) {
-    if (prevProps !== this.props) {
-    }
-  }*/
-  trashClick = (phoneNumber, e) => {
+function MsgContactList(props) {
+  const trashClick = (phoneNumber, e) => {
     e.stopPropagation();
     if (
       window.confirm(
         `Are you sure you want to delete all messages to '${phoneNumber}' ?`
       )
     )
-      this.props.deleteThread(phoneNumber);
+      props.deleteThread(phoneNumber);
   };
 
-  render() {
-    return (
-      <div>
-        {Object.keys(this.props.channelList)
-          .sort((a, b) => {
-            if (
-              this.props.channelList[a].lastMessage &&
-              this.props.channelList[b].lastMessage
-            ) {
-              return this.props.channelList[a].lastMessage.timestamp >
-                this.props.channelList[b].lastMessage.timestamp
-                ? -1
-                : 1;
-            } else {
-              return 0;
-            }
-          })
-          .map((phoneNumber) => {
-            const phoneNumberParsed = parsePhoneNumberFromString(phoneNumber)
-              ? parsePhoneNumberFromString(phoneNumber).formatInternational()
-              : phoneNumber;
-            return (
-              <Contact
-                key={phoneNumber}
-                onClick={this.props.selectContact.bind(null, phoneNumber)}
-              >
-                <Header>
-                  <Author>{phoneNumberParsed}</Author>
-                  <BadgeContainer>
-                    {this.props.msgUnreadsCache[phoneNumber] > 0 && (
-                      <BadgeAfter>
-                        {this.props.msgUnreadsCache[phoneNumber]}
-                      </BadgeAfter>
-                    )}
-                  </BadgeContainer>
-                  <TimeStamp>
-                    {this.props.channelList[phoneNumber].lastMessage
-                      ? printTimestamp(
-                          this.props.channelList[phoneNumber].lastMessage
-                            .timestamp
-                        )
-                      : ''}
-                  </TimeStamp>
-                  <Arrow>{SvgFwdArrow}</Arrow>
-                </Header>
-                <Body>
-                  <BodyPreview>
-                    {this.props.msgCache[phoneNumber] &&
-                    this.props.msgCache[phoneNumber][
-                      this.props.msgCache[phoneNumber].length - 1
-                    ]
-                      ? formatBodyPreviewText(
-                          this.props.msgCache[phoneNumber][
-                            this.props.msgCache[phoneNumber].length - 1
-                          ].body
-                        )
-                      : '...'}
-                  </BodyPreview>
-                  <Trash onClick={this.trashClick.bind(null, phoneNumber)} />
-                </Body>
-              </Contact>
-            );
-          })}
-      </div>
-    );
-  }
+  return (
+    <div>
+      {Object.keys(props.channelList)
+        .sort((a, b) => {
+          if (
+            props.channelList[a].lastMessage &&
+            props.channelList[b].lastMessage
+          ) {
+            return props.channelList[a].lastMessage.timestamp >
+              props.channelList[b].lastMessage.timestamp
+              ? -1
+              : 1;
+          } else {
+            return 0;
+          }
+        })
+        .map((phoneNumber) => {
+          const phoneNumberParsed = parsePhoneNumberFromString(phoneNumber)
+            ? parsePhoneNumberFromString(phoneNumber).formatInternational()
+            : phoneNumber;
+          return (
+            <Contact
+              key={phoneNumber}
+              onClick={props.selectContact.bind(null, phoneNumber)}
+            >
+              <Header>
+                <Author>{phoneNumberParsed}</Author>
+                <BadgeContainer>
+                  {props.msgUnreadsCache[phoneNumber] > 0 && (
+                    <BadgeAfter>
+                      {props.msgUnreadsCache[phoneNumber]}
+                    </BadgeAfter>
+                  )}
+                </BadgeContainer>
+                <TimeStamp>
+                  {props.channelList[phoneNumber].lastMessage
+                    ? printTimestamp(
+                        props.channelList[phoneNumber].lastMessage.timestamp
+                      )
+                    : ''}
+                </TimeStamp>
+                <Arrow>{SvgFwdArrow}</Arrow>
+              </Header>
+              <Body>
+                <BodyPreview>
+                  {props.msgCache[phoneNumber] &&
+                  props.msgCache[phoneNumber][
+                    props.msgCache[phoneNumber].length - 1
+                  ]
+                    ? formatBodyPreviewText(
+                        props.msgCache[phoneNumber][
+                          props.msgCache[phoneNumber].length - 1
+                        ].body
+                      )
+                    : '...'}
+                </BodyPreview>
+                <Trash onClick={trashClick.bind(null, phoneNumber)} />
+              </Body>
+            </Contact>
+          );
+        })}
+    </div>
+  );
 }
 
 const Header = styled.div`
@@ -246,3 +234,5 @@ const Contact = styled.div`
     display: inline;
   }
 `;
+
+export default MsgContactList;
