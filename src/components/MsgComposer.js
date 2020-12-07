@@ -32,6 +32,7 @@ export default class MsgComposer extends Component {
       textArea.scrollHeight,
       textAreaMaxHeight
     )}px`;
+    textArea.focus();
   }
 
   handleChange(e) {
@@ -108,6 +109,7 @@ export default class MsgComposer extends Component {
         <TextAreaContainer key="txtAreaContainer">
           <TextArea
             rows="1"
+            autoFocus
             placeholder="Type message"
             ref={this.msgTextRef}
             value={this.state.msgText}
