@@ -89,6 +89,7 @@ export default class MsgList extends Component {
         <Container key="msgListCont" ref={this.scrollAreaRef}>
           <StyledReactTooltip
             key="tooltip"
+            place="left"
             effect="solid"
             multiline={true}
             delayHide={500}
@@ -150,7 +151,7 @@ export default class MsgList extends Component {
 
 const StyledReactTooltip = styled(ReactTooltip)`
   &.type-dark {
-    font-size: 12px;
+    font-size: 11px;
     padding: 0.5rem 0.75rem;
     background-color: #565b73;
     color: #ffffff;
