@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import chroma from 'chroma-js';
+import { formParams } from '../lib/common';
 
 const textAreaMaxHeight = 82; // px
-//const msgOutboundUrl = 'https://build-client-backend-5498-dev.twil.io/msgOutbound';
-const msgOutboundUrl = '/msgOutbound';
+const msgOutboundUrl =
+  (process.env.REACT_APP_RUNTIME_DOMAIN
+    ? process.env.REACT_APP_RUNTIME_DOMAIN
+    : '') + '/msgOutbound';
 
 const hover_accent = chroma(process.env.REACT_APP_ACCENT_COLOR).darken().hex();
 
@@ -16,10 +19,6 @@ export default class MsgComposer extends Component {
       sending: false,
       error: null
     };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleKeyDown = this.handleKeyDown.bind(this);
-    this.handleSend = this.handleSend.bind(this);
-
     this.msgTextRef = React.createRef();
   }
 
@@ -29,14 +28,15 @@ export default class MsgComposer extends Component {
       textArea.scrollHeight,
       textAreaMaxHeight
     )}px`;
+    textArea.focus();
   }
 
-  handleChange(e) {
+  handleChange = (e) => {
     this.setState({ msgText: e.target.value });
     this.resizeTextArea(e.target);
-  }
+  };
 
-  handleKeyDown(e) {
+  handleKeyDown = (e) => {
     if (e.keyCode === 13) {
       // Enter
       if (e.shiftKey) {
@@ -47,23 +47,14 @@ export default class MsgComposer extends Component {
         this.handleSend();
       }
     }
-  }
+  };
 
   normalizePhoneNumber(phoneNumber) {
     return phoneNumber.replace(/[()\- ]/g, '');
   }
 
-  handleSend() {
+  handleSend = () => {
     this.setState({ sending: true });
-    function formParams(params) {
-      return Object.keys(params)
-        .map((key) => {
-          return (
-            encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
-          );
-        })
-        .join('&');
-    }
 
     const contact = this.props.selectedContact;
     let toNumber = contact;
@@ -71,8 +62,9 @@ export default class MsgComposer extends Component {
       toNumber = this.normalizePhoneNumber(this.props.newPhoneNumber);
     }
     const body = formParams({
-      To: toNumber,
-      Body: this.state.msgText
+      to: toNumber,
+      body: this.state.msgText,
+      secret: this.props.secret
     });
 
     fetch(msgOutboundUrl, {
@@ -100,7 +92,7 @@ export default class MsgComposer extends Component {
         this.setState({ sending: false, error: 'Backend err:' + err });
         console.error('Error while sending message:', err);
       });
-  }
+  };
 
   render() {
     return [
@@ -113,6 +105,7 @@ export default class MsgComposer extends Component {
         <TextAreaContainer key="txtAreaContainer">
           <TextArea
             rows="1"
+            autoFocus
             placeholder="Type message"
             ref={this.msgTextRef}
             value={this.state.msgText}
