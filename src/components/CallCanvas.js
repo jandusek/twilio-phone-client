@@ -17,8 +17,6 @@ export default class CanvasMsg extends Component {
   constructor(props) {
     super(props);
     this.asYouType = new AsYouType('US');
-
-    this.nextKeyReset = false;
     this.timer = null;
 
     let dialActive = {};
@@ -45,13 +43,15 @@ export default class CanvasMsg extends Component {
       elapsedTime: null,
       dialActive,
       isMuted: false,
-      //clientStatus: 'offline',
       incomingRing: false,
       incomingConnection: null
     };
 
     this.numberInputRef = React.createRef();
-
+    this.disconnectHandler = (connection) => {
+      console.log('CC: DISCONNECT event fired');
+      this.wrapupCall();
+    };
     this.handlersSet = false;
 
     this.theme = {
@@ -87,6 +87,9 @@ export default class CanvasMsg extends Component {
     }
   }
 
+  /**
+   * Outbound call
+   */
   connectCall = () => {
     if (this.props.client.status() !== 'ready') {
       console.error('Client is not ready (' + this.props.client.status() + ')');
@@ -96,25 +99,21 @@ export default class CanvasMsg extends Component {
     this.props.setCallConnection(
       this.props.client.connect({
         number: this.props.callDisplay
-      }),
-      () => {
-        //this.props.callConnection.on('disconnect', this.wrapupCall); // Moved to Device event handler
-        /*this.props.callConnection.on('volume', (inputVolume, outputVolume) => {
-          console.log('Vol:', inputVolume, outputVolume);
-        });*/
-        this.props.callConnection.on('mute', (isMuted, connection) => {
-          this.setState({ isMuted });
-        });
-      }
+      })
     );
-    this.nextKeyReset = true;
+    console.log('connected');
+    this.props.getCallConnection().on('mute', (isMuted) => {
+      this.setState({ isMuted });
+    });
+    this.props.setCallTypingPN(false);
+    this.props.setCallNextKeyReset(true);
     this.props.setCallStartTime(new Date());
     this.timer = setTimeout(this.tick, 1000);
   };
 
   tick = () => {
     const now = new Date();
-    this.setState({ elapsedTime: now - this.props.callStartTime });
+    this.setState({ elapsedTime: now - this.props.getCallStartTime() });
     this.timer = setTimeout(this.tick, 1000 - (now % 1000));
   };
 
@@ -135,30 +134,33 @@ export default class CanvasMsg extends Component {
     this.props.client.disconnectAll();
   };
 
+  /**
+   * Cleanup after a call has ended
+   */
   wrapupCall = () => {
     clearTimeout(this.timer);
-    this.props.setCallDisplay('');
-    this.setState({ elapsedTime: null });
-    this.props.setCallStartTime(null);
+    this.setState({ elapsedTime: null, isMuted: false });
     // Destroy any pending connection listeners
-    if (this.props.callConnection) {
-      this.props.callConnection.removeAllListeners('mute');
+    if (this.props.getCallConnection()) {
+      this.props.getCallConnection().removeAllListeners('mute');
     }
   };
 
   toggleMute = () => {
-    this.props.callConnection.mute(!this.props.callConnection.isMuted());
+    this.props
+      .getCallConnection()
+      .mute(!this.props.getCallConnection().isMuted());
   };
 
   dialPressed = (dial) => {
     let _display = this.props.callDisplay;
     // reset display (e.g. after call is placed)
-    if (this.nextKeyReset) {
+    if (this.props.getCallNextKeyReset() && dial.match(/^[0-9+#*]$/)) {
       this.props.setCallDisplay('');
       _display = '';
-      this.nextKeyReset = false;
+      this.props.setCallNextKeyReset(false);
     }
-    if (dial.match(/^[0-9]$/)) {
+    if (dial.match(/^[0-9#*]$/)) {
       this.updateDisplay(_display + dial);
     } else if (dial === 'Backspace') {
       if (_display.charAt(_display.length - 1) === ')') {
@@ -231,9 +233,9 @@ export default class CanvasMsg extends Component {
       e.stopPropagation();
     } else {
       // reset display (e.g. after call is placed)
-      if (this.nextKeyReset) {
+      if (this.props.getCallNextKeyReset()) {
         this.props.setCallDisplay('');
-        this.nextKeyReset = false;
+        this.props.setCallNextKeyReset(false);
       }
       // simulate events as if a real dial was pressed
       this.dialFakePressed(e.key);
@@ -256,10 +258,14 @@ export default class CanvasMsg extends Component {
   };
 
   updateDisplay = (newValue) => {
-    this.asYouType.reset();
-    const result = this.asYouType.input(newValue);
-    if (result !== '') {
-      this.props.setCallDisplay(result);
+    if (this.props.getCallTypingPN() === true) {
+      this.asYouType.reset();
+      const result = this.asYouType.input(newValue);
+      if (result !== '') {
+        this.props.setCallDisplay(result);
+      } else {
+        this.props.setCallDisplay(newValue);
+      }
     } else {
       this.props.setCallDisplay(newValue);
     }
@@ -275,9 +281,9 @@ export default class CanvasMsg extends Component {
     //this.props.client.removeAllListeners('incoming');
     //this.props.client.removeAllListeners('connect');
     //this.props.client.removeAllListeners('ready');
-    this.props.client.removeAllListeners('disconnect');
-    if (this.props.callConnection) {
-      this.props.callConnection.removeAllListeners('mute');
+    this.props.client.removeListener('disconnect', this.disconnectHandler);
+    if (this.props.getCallConnection()) {
+      this.props.getCallConnection().removeAllListeners('mute');
     }
     clearTimeout(this.timer);
   }
@@ -288,26 +294,26 @@ export default class CanvasMsg extends Component {
         console.log('CC: CONNECT event fired');
       });*/
 
-      this.props.client.on('disconnect', (conn) => {
-        console.log('CC: DISCONNECT event fired');
-        this.wrapupCall();
-      });
+      this.props.client.on('disconnect', this.disconnectHandler);
 
       // if there's an active connection already in place
       // (i.e. switching from SMS canvas after placing a call)
-      if (this.props.callConnection) {
+      if (
+        this.props.getCallConnection() &&
+        this.props.getCallConnection().status() !== 'closed'
+      ) {
         // re-set mute event listener
-        this.props.callConnection.on('mute', (isMuted, connection) => {
+        this.props.getCallConnection().on('mute', (isMuted) => {
           this.setState({ isMuted });
         });
         // and update mute button's state
-        this.setState({ isMuted: this.props.callConnection.isMuted() });
+        this.setState({ isMuted: this.props.getCallConnection().isMuted() });
 
         // re-set elapsed time timer
         this.timer = setTimeout(this.tick, 1000);
         // and update current elapsed time
         const now = new Date();
-        this.setState({ elapsedTime: now - this.props.callStartTime });
+        this.setState({ elapsedTime: now - this.props.getCallStartTime() });
       }
       this.handlersSet = true;
     }
@@ -332,7 +338,8 @@ export default class CanvasMsg extends Component {
     if (conn) {
       conn.accept();
       this.updateDisplay(conn.parameters.From);
-      this.nextKeyReset = true;
+      this.props.setCallTypingPN(false);
+      this.props.setCallNextKeyReset(true);
       this.props.setCallStartTime(new Date());
       this.timer = setTimeout(this.tick, 1000);
     } else {

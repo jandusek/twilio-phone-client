@@ -29,9 +29,13 @@ function ChannelContent(props) {
         setCallDisplay={props.setCallDisplay}
         callDisplay={props.callDisplay}
         setCallConnection={props.setCallConnection}
-        callConnection={props.callConnection}
+        getCallConnection={props.getCallConnection}
         setCallStartTime={props.setCallStartTime}
-        callStartTime={props.callStartTime}
+        getCallStartTime={props.getCallStartTime}
+        setCallNextKeyReset={props.setCallNextKeyReset}
+        getCallNextKeyReset={props.getCallNextKeyReset}
+        setCallTypingPN={props.setCallTypingPN}
+        getCallTypingPN={props.getCallTypingPN}
       />
     );
   } else {

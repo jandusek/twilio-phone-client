@@ -32,10 +32,15 @@ export default class Canvas extends Component {
       msgUnreadsCache: {},
       msgCache: {},
       msgPgtrCache: {},
-      callDisplay: '', // phone number after formatting
-      callConnection: null,
-      callStartTime: null
+      callDisplay: '' // phone number after formatting
     };
+
+    this.callConnection = null;
+    this.callStartTime = null;
+    this.callNextKeyReset = false;
+    // is user typing a phone number (i.e. no call in progress) or
+    // are they using DTMF during a call?
+    this.callTypingPN = true;
   }
 
   /**
@@ -97,36 +102,42 @@ export default class Canvas extends Component {
   };
 
   /**
-   * Secret setter
-   * @param {*} secret
+   * Setters & getters for properties that don't have to be part of the state,
+   * but need to be accessed by child components and need their values to
+   * survive unmounting of the consuming component
    */
+
   setSecret = (secret) => {
     this.setState({ secret }, () => this.initClients());
   };
-
-  /**
-   * callDisplay setter
-   * @param {*} callDisplay
-   */
   setCallDisplay = (callDisplay) => {
     this.setState({ callDisplay });
   };
-
-  /**
-   * callConnection setter
-   * @param {*} callConnection
-   */
-  setCallConnection = (callConnection, callback = () => {}) => {
-    this.setState({ callConnection }, callback);
+  setCallConnection = (callConnection) => {
+    this.callConnection = callConnection;
   };
-
-  /**
-   * callStartTime setter
-   * @param {*} callStartTime
-   */
+  getCallConnection = () => {
+    return this.callConnection;
+  };
   setCallStartTime = (callStartTime) => {
-    this.setState({ callStartTime });
+    this.callStartTime = callStartTime;
   };
+  getCallStartTime = () => {
+    return this.callStartTime;
+  };
+  setCallNextKeyReset = (callNextKeyReset) => {
+    this.callNextKeyReset = callNextKeyReset;
+  };
+  getCallNextKeyReset = () => {
+    return this.callNextKeyReset;
+  };
+  setCallTypingPN = (callTypingPN) => {
+    this.callTypingPN = callTypingPN;
+  };
+  getCallTypingPN = () => {
+    return this.callTypingPN;
+  };
+
   /**
    * msgUnreadsCache setter
    * @param {*} contact - the contact for which the cache should be updated
@@ -288,17 +299,19 @@ export default class Canvas extends Component {
             });
           }
         });
-        voiceClient.on('incoming', (conn) => {
-          console.log('PC: INCOMING event fired from ' + conn.parameters.From);
-          this.setState({ incomingCall: conn });
-          conn.on('reject', (conn) => {
+        voiceClient.on('incoming', (connection) => {
+          console.log(
+            'PC: INCOMING event fired from ' + connection.parameters.From
+          );
+          this.setState({ incomingCall: connection });
+          connection.on('reject', (connection) => {
             // when incoming call gets rejected from CallCanvas, update state
             this.setState({
               incomingCall: null
             });
           });
         });
-        voiceClient.on('cancel', (conn) => {
+        voiceClient.on('cancel', (connection) => {
           console.log('PC: CANCEL event fired');
           this.setState({
             incomingCall: null
@@ -308,6 +321,14 @@ export default class Canvas extends Component {
         voiceClient.on('connect', (connection) => {
           console.log('PC: CONNECT event fired');
           this.setState({ incomingCall: null }); // cleanup the incoming call state and let the component handle this natively
+        });
+
+        voiceClient.on('disconnect', (connection) => {
+          console.log('PC: DISCONNECT event fired');
+          this.setCallDisplay('');
+          this.setCallStartTime(null);
+          this.setCallTypingPN(true);
+          this.setCallNextKeyReset(false);
         });
 
         console.log('voiceClient is initialized');
@@ -468,9 +489,13 @@ export default class Canvas extends Component {
               setCallDisplay={this.setCallDisplay}
               callDisplay={this.state.callDisplay}
               setCallConnection={this.setCallConnection}
-              callConnection={this.state.callConnection}
+              getCallConnection={this.getCallConnection}
               setCallStartTime={this.setCallStartTime}
-              callStartTime={this.state.callStartTime}
+              getCallStartTime={this.getCallStartTime}
+              setCallNextKeyReset={this.setCallNextKeyReset}
+              getCallNextKeyReset={this.getCallNextKeyReset}
+              setCallTypingPN={this.setCallTypingPN}
+              getCallTypingPN={this.getCallTypingPN}
               selectedChannel={this.state.selectedChannel}
               secret={this.state.secret}
               client={
