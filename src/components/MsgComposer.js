@@ -19,10 +19,6 @@ export default class MsgComposer extends Component {
       sending: false,
       error: null
     };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleKeyDown = this.handleKeyDown.bind(this);
-    this.handleSend = this.handleSend.bind(this);
-
     this.msgTextRef = React.createRef();
   }
 
@@ -35,12 +31,12 @@ export default class MsgComposer extends Component {
     textArea.focus();
   }
 
-  handleChange(e) {
+  handleChange = (e) => {
     this.setState({ msgText: e.target.value });
     this.resizeTextArea(e.target);
-  }
+  };
 
-  handleKeyDown(e) {
+  handleKeyDown = (e) => {
     if (e.keyCode === 13) {
       // Enter
       if (e.shiftKey) {
@@ -51,13 +47,13 @@ export default class MsgComposer extends Component {
         this.handleSend();
       }
     }
-  }
+  };
 
   normalizePhoneNumber(phoneNumber) {
     return phoneNumber.replace(/[()\- ]/g, '');
   }
 
-  handleSend() {
+  handleSend = () => {
     this.setState({ sending: true });
 
     const contact = this.props.selectedContact;
@@ -96,7 +92,7 @@ export default class MsgComposer extends Component {
         this.setState({ sending: false, error: 'Backend err:' + err });
         console.error('Error while sending message:', err);
       });
-  }
+  };
 
   render() {
     return [

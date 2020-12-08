@@ -11,34 +11,29 @@ export default class AuthForm extends Component {
   constructor(props) {
     super(props);
     this.state = { remember: false, secret: '' };
-    this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.updateSecret = this.updateSecret.bind(this);
   }
 
-  handleCheckboxChange(event) {
+  handleCheckboxChange = (event) => {
     const value = event.target.checked;
     this.setState({
       remember: value
     });
-  }
+  };
 
-  handleSubmit(event) {
+  handleSubmit = (event) => {
     event.preventDefault();
     const secret = this.state.secret;
     this.props.setSecret(secret);
     if (this.state.remember) {
       localStorage.setItem('secret', secret);
     }
-  }
+  };
 
-  handleKeypress(event) {}
-
-  updateSecret(event) {
+  updateSecret = (event) => {
     this.setState({
       secret: event.target.value
     });
-  }
+  };
 
   render() {
     return (
