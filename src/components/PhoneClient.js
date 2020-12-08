@@ -31,7 +31,10 @@ export default class Canvas extends Component {
       displayError: null,
       msgUnreadsCache: {},
       msgCache: {},
-      msgPgtrCache: {}
+      msgPgtrCache: {},
+      callDisplay: '', // phone number after formatting
+      callConnection: null,
+      callStartTime: null
     };
   }
 
@@ -95,11 +98,35 @@ export default class Canvas extends Component {
 
   /**
    * Secret setter
+   * @param {*} secret
    */
   setSecret = (secret) => {
     this.setState({ secret }, () => this.initClients());
   };
 
+  /**
+   * callDisplay setter
+   * @param {*} callDisplay
+   */
+  setCallDisplay = (callDisplay) => {
+    this.setState({ callDisplay });
+  };
+
+  /**
+   * callConnection setter
+   * @param {*} callConnection
+   */
+  setCallConnection = (callConnection, callback = () => {}) => {
+    this.setState({ callConnection }, callback);
+  };
+
+  /**
+   * callStartTime setter
+   * @param {*} callStartTime
+   */
+  setCallStartTime = (callStartTime) => {
+    this.setState({ callStartTime });
+  };
   /**
    * msgUnreadsCache setter
    * @param {*} contact - the contact for which the cache should be updated
@@ -438,6 +465,12 @@ export default class Canvas extends Component {
               addMsgCachePage={this.addMsgCachePage}
               setMsgCachePage={this.setMsgCachePage}
               addMsgCacheMsg={this.addMsgCacheMsg}
+              setCallDisplay={this.setCallDisplay}
+              callDisplay={this.state.callDisplay}
+              setCallConnection={this.setCallConnection}
+              callConnection={this.state.callConnection}
+              setCallStartTime={this.setCallStartTime}
+              callStartTime={this.state.callStartTime}
               selectedChannel={this.state.selectedChannel}
               secret={this.state.secret}
               client={

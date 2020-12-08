@@ -13,39 +13,39 @@ class Dial extends Component {
     super(props);
     this.tid = 0;
     this.suppressClick = false;
-    this.toggleOn = this.toggleOn.bind(this);
-    this.toggleOff = this.toggleOff.bind(this);
-    this.pressAndHold = this.pressAndHold.bind(this);
-    this.dialPress = this.dialPress.bind(this);
   }
 
-  toggleOn() {
+  toggleOn = () => {
     if (this.props.digit === '0' && this.tid === 0) {
       this.tid = setInterval(this.pressAndHold, 600);
     }
-  }
+  };
 
-  toggleOff() {
+  toggleOff = () => {
     if (this.tid !== 0) {
       clearInterval(this.tid);
       this.tid = 0;
     }
-  }
+  };
 
-  pressAndHold() {
+  pressAndHold = () => {
     this.suppressClick = true;
     clearInterval(this.tid);
     this.tid = 0;
     if (this.props.digit === '0') {
       this.props.dialPressed(this.props.sub);
     }
-  }
+  };
 
-  dialPress() {
+  dialPress = () => {
     if (!this.suppressClick) {
       this.props.dialPressed(this.props.digit);
     }
     this.suppressClick = false;
+  };
+
+  componentWillUnmount() {
+    clearInterval(this.tid);
   }
 
   render() {

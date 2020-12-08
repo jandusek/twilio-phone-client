@@ -23,7 +23,16 @@ function ChannelContent(props) {
     );
   } else if (props.selectedChannel === 'call') {
     return (
-      <CallCanvas client={props.client} incomingCall={props.incomingCall} />
+      <CallCanvas
+        client={props.client}
+        incomingCall={props.incomingCall}
+        setCallDisplay={props.setCallDisplay}
+        callDisplay={props.callDisplay}
+        setCallConnection={props.setCallConnection}
+        callConnection={props.callConnection}
+        setCallStartTime={props.setCallStartTime}
+        callStartTime={props.callStartTime}
+      />
     );
   } else {
     return <AltCanvas>Channel not supported</AltCanvas>;
