@@ -29,6 +29,8 @@ The npm `deploy` command utilizes [Twilio CLI](https://www.twilio.com/docs/twili
 
 - SMS: Infitinty scolling (older messages get loaded automatically as one scrolls up in a thread)
 - SMS: Hovering over message timestamp displays tooltip with additional details of each message including its [SID](https://www.twilio.com/docs/glossary/what-is-a-sid)
+- SMS: Unread message count tracking
+- Call: Support for both inbound and outbound calls
 - Configurable accent color (see `REACT_APP_ACCENT_COLOR` in `/.env`)
 
 ## Installation
@@ -56,19 +58,27 @@ $ cd deploy; npm install; cd ..  # install Twilio Runtime dependencies
 $ npm run deploy                 # test deploy your application to get its public URLs
 ...
 Functions:
+   [protected] https://twilio-phone-client-XXXX-dev.twil.io/callInbound  <<< note down the /callInbound URL
    [protected] https://twilio-phone-client-XXXX-dev.twil.io/callOutbound <<< note down the /callOutbound URL
    [protected] https://twilio-phone-client-XXXX-dev.twil.io/msgInbound   <<< note down the /msgInbound URL
    https://twilio-phone-client-XXXX-dev.twil.io/getAccessToken
-   https://twilio-phone-client-XXXX-dev.twil.io/getCapToken
    https://twilio-phone-client-XXXX-dev.twil.io/msgOutbound
 
 ```
 
 Your phone client will **not work** at this point.
 
-4. Purchase a [Twilio phone number](https://www.twilio.com/console/phone-numbers/incoming) and note it down (if you plan to use both SMS and calls, make sure your phone number has both capabilities). In the phone number's configuration, set the "A Message Comes In" Webhook to the `/msgInbound` URL you have collected above.
+4. Purchase a [Twilio phone number](https://www.twilio.com/console/phone-numbers/incoming) and note it down (if you plan to use both SMS and calls, make sure your phone number has both capabilities).
+
+In the phone number's configuration, set the "A Call Comes In" Webhook to the `/callInbound` URL you have collected above.
+
+![A Call Comes In](./screenshots/voice_webhook.png)
+
+Then set the "A Message Comes In" Webhook to the `/msgInbound` URL you have collected above.
 
 ![A Message Comes In](./screenshots/msg_webhook.png)
+
+After you hit the Save button, both webhooks will update to a Function, that is expected.
 
 5. Create a new [TwiML App](https://www.twilio.com/console/voice/twiml/apps) and set its Voice Request URL to the `/callOutbound` URL you have noted in the previous step. Save it and then go back to the TwiML App's configuration and note down its SID.
 
