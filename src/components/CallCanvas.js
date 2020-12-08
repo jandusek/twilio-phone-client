@@ -101,7 +101,6 @@ export default class CanvasMsg extends Component {
         number: this.props.callDisplay
       })
     );
-    console.log('connected');
     this.props.getCallConnection().on('mute', (isMuted) => {
       this.setState({ isMuted });
     });
@@ -342,6 +341,9 @@ export default class CanvasMsg extends Component {
       this.props.setCallNextKeyReset(true);
       this.props.setCallStartTime(new Date());
       this.timer = setTimeout(this.tick, 1000);
+      this.props.getCallConnection().on('mute', (isMuted) => {
+        this.setState({ isMuted });
+      });
     } else {
       console.error('No incoming connection found');
     }
@@ -366,8 +368,6 @@ export default class CanvasMsg extends Component {
         </Canvas>
       );
     } else if (this.props.incomingCall !== null) {
-      console.log('connection:', this.props.incomingCall);
-      console.log('status:', this.props.incomingCall.status());
       return (
         <Canvas>
           <Label1>Incoming call from</Label1>

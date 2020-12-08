@@ -304,6 +304,7 @@ export default class Canvas extends Component {
             'PC: INCOMING event fired from ' + connection.parameters.From
           );
           this.setState({ incomingCall: connection });
+          this.setCallConnection(connection);
           connection.on('reject', (connection) => {
             // when incoming call gets rejected from CallCanvas, update state
             this.setState({
