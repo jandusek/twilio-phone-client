@@ -108,7 +108,7 @@ Windows: `chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"
 
 - ~~Add basic form of authentication~~
 - Add one-click installation option (using Heroku) to eliminate the need for local env and numerous manual installation steps
-- Add support for inbound calls (work in progress)
+- ~~Add support for inbound calls~~
 - ~~Add unread badges to individual messaging threads and SMS channel overall~~
 - ~~Add ability to delete SMS threads from within the client~~
 - Add support for Multimedia Messages (MMS) for both inbound and outbound
@@ -131,6 +131,12 @@ Windows: `chrome --app="https://twilio-phone-client-XXXX-dev.twil.io/index.html"
 - This is a breaking change version and reinstallation is recommended (identity used in SDKs and Chat channel member name is now tied to the phone number, API key env variables have been renamed)
 - Moved from Capability to Access tokens for Client.js
 - Auth Token no longer needed, authentication fully via API keys
+- Fixed numerous issues associated with switching between the SMS and Call tabs
+- Fixed issue with mute button not working under certain circumstances
+- Message compose input field now always retains focus for smoother back and forth messaging experience
+- Added support for inbound calls
+- Added ability to delete messaging history with a given contact
+- Added basic access control using a shared secret
 
 #### Upgrade steps from v0.9
 
