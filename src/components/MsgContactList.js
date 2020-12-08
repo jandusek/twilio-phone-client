@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { printTimestamp, formatBodyPreviewText } from '../helpers.js';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
