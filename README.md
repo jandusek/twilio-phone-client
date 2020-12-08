@@ -9,6 +9,7 @@
 - [Screenshots](#screenshots)
   - [SMS](#sms)
   - [Call](#call)
+- [Changelog](#changelog)
 
 ## Introduction
 
