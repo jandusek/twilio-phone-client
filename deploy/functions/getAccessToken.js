@@ -21,7 +21,7 @@ exports.handler = function (context, event, callback) {
   }
 
   // check secret
-  if (event.secret !== context.SECRET) {
+  if (context.SECRET && event.secret !== context.SECRET) {
     response.setStatusCode(401);
     response.setBody('Invalid secret');
     return callback(null, response);
