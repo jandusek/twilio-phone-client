@@ -49,7 +49,13 @@ After you hit the Save button, both webhooks will update to a Function, that is 
 
 ![TwiML APP](./screenshots/twiml_app.png)
 
-6. Save the collected information and deploy
+6. Set your password
+
+Since the phone client is deployed on a public URL, anyone who knows/guesses the URL can potentially use it. Therefore the client is password-protected by default. The password that you need to enter when accessing the client is controlled by the `SECRET` env variable set in the next step. Set it to any string.
+
+If you do not want the client to be password-protected, you can set the `SECRET` variable to an empty string (this is not recommended however).
+
+7. Save the collected information and deploy
 
 ```
 $ cp deploy/.env.sample deploy/.env
@@ -71,7 +77,7 @@ Assets:
    ...
 ```
 
-7. Now you can open the deployed `index.html` URL in your web browser and start your phone client.
+8. Now you can open the deployed `index.html` URL in your web browser and start your phone client.
 
 **Pro tip:** To run the client in its own resizable window with minimal window chrome, you can use something like this:
 
