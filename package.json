@@ -19,7 +19,7 @@
     "scripts": {
         "start": "react-scripts start",
         "build": "react-scripts build",
-        "deploy": "react-scripts build && rm -rf deploy/assets/* && cp -r build/* deploy/assets/ && cd deploy && TWILIO_SERVERLESS_API_CONCURRENCY=1 twilio serverless:deploy",
+        "deploy": "react-scripts build && rm -rf deploy/assets/ && mkdir deploy/assets/ && cp -r build/* deploy/assets/ && cd deploy && TWILIO_SERVERLESS_API_CONCURRENCY=1 twilio serverless:deploy",
         "test": "react-scripts test",
         "eject": "react-scripts eject"
     },
