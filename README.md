@@ -1,4 +1,8 @@
-# Twilio Phone Client
+# ⛔️ DEPRECATED Twilio Phone Client
+
+This repository is no longer maintained, please consider using Twilio's [dev-phone](https://www.twilio.com/docs/labs/dev-phone) instead.
+
+---
 
 - [Installation](./INSTALL.md)
 - [Changelog](./CHANGELOG.md)
